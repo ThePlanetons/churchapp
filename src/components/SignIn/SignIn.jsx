@@ -1,5 +1,5 @@
-import { SignInForm } from '../SignIn/SignInForm'
-import { WelcomeSection } from '../SignIn/WelcomeSection'
+import { SignInForm } from './SigninForm/SignInForm'
+import { WelcomeSection } from './WelcomeSection/WelcomeSection'
 
 export function SignIn() {
   return (

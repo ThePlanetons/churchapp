@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 import { ChurchPage } from '../components/Landing/ChurchPage'
 import { SignIn } from '../components/SignIn/SignIn'
+import { Admin } from '../components/Admin/Admin';
 
 const AppRouter = () => {
   return (
@@ -10,7 +11,7 @@ const AppRouter = () => {
       <Routes>
         <Route path="/" element={<ChurchPage />} />
         <Route path="/sign-in" element={<SignIn />} />
-        {/* <Route path="/admin" element={<ContactPage />} /> */}
+        <Route path="/admin" element={<Admin />} />
       </Routes>
     </Router>
   );

@@ -1,5 +1,8 @@
 import { useState } from 'react'
 
+import { Link } from 'react-router-dom';
+import Button from '@mui/material/Button';
+
 export function SignInForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -67,12 +70,24 @@ export function SignInForm() {
           </a>
         </div>
 
-        <button
+        <Button variant="contained" color="primary" component={Link} to="/admin" sx={{
+          color: 'black',
+          borderRadius: '2xl',
+          boxShadow: 'md',
+          backgroundColor: 'orange.200',
+          // ...theme('colors.orange'),
+          // '&:hover': {
+          //   backgroundColor: 'orange.300',
+          // },
+        }}>
+          Sign In
+        </Button>
+        {/* <button
           type="submit"
           className="w-full bg-yellow-400 text-black py-2 px-4 rounded-lg hover:bg-yellow-500 transition-colors"
         >
           Sign in
-        </button>
+        </button> */}
       </form>
 
       <div className="mt-6">
