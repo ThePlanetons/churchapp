@@ -6,7 +6,7 @@ export function ChurchPage() {
   return (
     <main className="flex flex-col lg:px-2 bg-white " role="main">
       <Header />
-      <section className="flex flex-col items-center px-20 pt-20 mt-8 bg-white rounded-xl max-md:px-5 max-md:max-w-full">
+      <section className="flex flex-col items-center px-20 pt-1 mt-8 bg-white rounded-xl max-md:px-5 max-md:max-w-full">
         <img
           loading="lazy"
           src="https://cdn.builder.io/api/v1/image/assets/4f3daa8442124f5a8036db8b3613459e/e3a60f8d9b8a9b2154ad348aa35bdffbe0fb3b50665290c91704fdd4c13e58ce?apiKey=4f3daa8442124f5a8036db8b3613459e&"
@@ -14,14 +14,14 @@ export function ChurchPage() {
           alt="Church Banner"
         />
       </section>
-      <section className="flex flex-row px-0.8 pt-20  mt-8 w-full bg-white max-md:max-w-full">
+      <section className="flex flex-row px-0.8 pt-1  mt-4 w-full bg-white max-md:max-w-full">
         <div className="self-center w-full max-w-[1400px] max-md:max-w-full">
-          <div className="flex gap-5 max-md:flex-col">
+          <div className="flex gap-5 max-md:flex-col">  
             <div className="flex flex-col w-[69%] max-md:ml-0 max-md:w-full">
               <div className="flex flex-col grow max-md:mt-10 max-md:max-w-full">
-                <h1 className="self-end mr-7 text-3xl font-extrabold leading-tight text-center text-black max-md:mr-2.5">
-                  Church Happens Here
-                </h1>
+              <h1 className="self-center text-3xl font-extrabold leading-tight text-center text-black max-md:text-center max-md:mr-0 mr-7">
+                Church Happens Here
+              </h1>
                 <div className="flex overflow-hidden flex-col mt-11 rounded-xl bg-white bg-opacity-0 shadow-[0px_4px_8px_rgba(0,0,0,0.17)] max-md:mt-10 max-md:max-w-full">
                   <img
                     loading="lazy"

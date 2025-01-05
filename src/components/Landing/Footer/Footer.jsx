@@ -10,7 +10,7 @@ export function Footer() {
   ];
 
   return (
-    <footer className="flex flex-col gap-10 items-center px-20 py-24 mt-48 text-center text-white bg-black rounded-xl max-md:px-5 max-md:mt-10 max-md:max-w-full" role="contentinfo">
+    <footer className="flex flex-col gap-10 items-center px-20 py-11 mt-20 text-center text-white bg-black rounded-xl max-md:px-5 max-md:mt-10 max-md:max-w-full" role="contentinfo">
 
       <div className="flex flex-row gap-5">
         {contactDetails.map((contact, index) => (
