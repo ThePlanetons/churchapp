@@ -69,7 +69,7 @@ export function SignInForm() {
             Forgot password?
           </a>
         </div>
-
+<div className='flex justify-center'>
         <Button variant="contained" color="primary" component={Link} to="/admin" sx={{
           color: 'black',
           borderRadius: '2xl',
@@ -82,6 +82,7 @@ export function SignInForm() {
         }}>
           Sign In
         </Button>
+        </div>
         {/* <button
           type="submit"
           className="w-full bg-yellow-400 text-black py-2 px-4 rounded-lg hover:bg-yellow-500 transition-colors"

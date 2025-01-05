@@ -7,7 +7,7 @@ export function WelcomeSection() {
   ]
 
   return (
-    <div className=" p-8 rounded-r-lg hidden lg:block lg:w-3/4">
+    <div className="p-8 rounded-r-lg hidden lg:block lg:w-3/4">
       <div className="max-w-md mx-10px">
         <h1 className="text-4xl font-bold mb-6 ">Welcome to our community</h1>
         <p className="text-gray-600 mb-8">XYZ</p>
