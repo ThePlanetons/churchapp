@@ -4,7 +4,7 @@ import { Footer } from './Footer/Footer';
 
 export function ChurchPage() {
   return (
-    <main className="flex flex-col lg:px-2 bg-white " role="main">
+    <main className="flex flex-col p-8 bg-white" role="main">
       <Header />
       <section className="flex flex-col items-center px-20 pt-1 mt-8 bg-white rounded-xl max-md:px-5 max-md:max-w-full">
         <img
