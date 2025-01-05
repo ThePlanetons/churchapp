@@ -9,7 +9,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 
-function Dashboard() {
+export function Dashboard() {
   const [data, setData] = useState([]);  // State to store API data
   const [loading, setLoading] = useState(true);  // State to manage loading state
   const [error, setError] = useState(null);  // State to manage error messages
@@ -63,7 +63,7 @@ function Dashboard() {
   );
 }
 
-export default Dashboard;
+// export default Dashboard;
 
 // import React, { useState, useEffect } from 'react';
 // import axios from 'axios';
