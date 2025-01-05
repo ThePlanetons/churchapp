@@ -22,13 +22,14 @@ export function ChurchPage() {
               <h1 className="self-center text-3xl font-extrabold leading-tight text-center text-black max-md:text-center max-md:mr-0 mr-7">
                 Church Happens Here
               </h1>
-                <div className="flex overflow-hidden flex-col mt-11 rounded-xl bg-white bg-opacity-0 shadow-[0px_4px_8px_rgba(0,0,0,0.17)] max-md:mt-10 max-md:max-w-full">
-                  <img
+                <div className="flex overflow-hidden  flex-col mt-11 rounded-xl bg-white bg-opacity-0 shadow-[0px_4px_8px_rgba(0,0,0,0.17)] max-md:mt-10 max-md:max-w-full">
+                  {/* <img
                     loading="lazy"
-                    src="https://cdn.builder.io/api/v1/image/assets/4f3daa8442124f5a8036db8b3613459e/c334e7bc2e481e84e7971df1e25a5d5fa91e7baf76ecfa34b23e388a7f321b31?apiKey=4f3daa8442124f5a8036db8b3613459e&"
+                    src="https://youtu.be/4wIYopgrDMI?si=-smRjdTRV5SeL4LR"
                     className="object-contain w-full rounded-xl aspect-[1.78] shadow-[0px_4px_8px_rgba(0,0,0,0.17)] max-md:max-w-full"
                     alt="Church Service"
-                  />
+                  /> */}
+                  <iframe width="1080" height="630" src="https://www.youtube.com/embed/4wIYopgrDMI?si=77BXANPhvhExmxAI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                 </div>
               </div>
             </div>

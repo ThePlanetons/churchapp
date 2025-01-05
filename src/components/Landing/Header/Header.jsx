@@ -36,7 +36,7 @@ export function Header({ backgroundImage }) {
         className="relative flex flex-col w-full h-[340px] md:h-[420px]" // Reduced height for mobile
         role="navigation"
       >
-        <img
+        <img 
           loading="lazy"
           src={backgroundImage || defaultBackground}
           className="inset-0 w-full h-full object-cover"
