@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-function SignInForm() {
+export function SignInForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
@@ -11,7 +11,7 @@ function SignInForm() {
   }
 
   return (
-   <div className="w-full max-w-md">
+    <div className="w-full max-w-md">
       <h2 className="text-2xl font-semibold mb-2">Sign in</h2>
       <p className="text-sm text-gray-600 mb-6">
         Don't have an account?{' '}
@@ -109,7 +109,3 @@ function SignInForm() {
     </div>
   )
 }
-
-export default SignInForm
-
-

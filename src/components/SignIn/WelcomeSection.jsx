@@ -1,4 +1,4 @@
-function WelcomeSection() {
+export function WelcomeSection() {
   const users = [
     { id: 1, avatar: "https://i.pravatar.cc/40?img=1" },
     { id: 2, avatar: "https://i.pravatar.cc/40?img=2" },
@@ -29,5 +29,3 @@ function WelcomeSection() {
     </div>
   )
 }
-
-export default WelcomeSection

@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import Button from '@mui/material/Button';
+
 import churchLogo from '../../../assets/csi.png';
 
 export function Header({ backgroundImage }) {
@@ -64,11 +67,23 @@ export function Header({ backgroundImage }) {
               </a>
             ))}
 
-            <button className="flex overflow-hidden flex-col justify-center text-sm font-medium text-center text-black rounded-2xl shadow-md bg-orange-200 min-h-[45px] min-w-[80px]">
+            <Button variant="contained" color="primary" component={Link} to="/sign-in" sx={{
+              color: 'black',
+              borderRadius: '2xl',
+              boxShadow: 'md',
+              backgroundColor: 'orange.200',
+              // ...theme('colors.orange'),
+              // '&:hover': {
+              //   backgroundColor: 'orange.300',
+              // },
+            }}>
+              Sign In
+            </Button>
+            {/* <button to="/sign-in" className="flex overflow-hidden flex-col justify-center text-sm font-medium text-center text-black rounded-2xl shadow-md bg-orange-200 min-h-[45px] min-w-[80px]">
               <span className="flex-1 gap-3 pt-1 pr-5 pl-4 bg-orange-200">
                 Sign In
               </span>
-            </button>
+            </button> */}
           </div>
 
           {/* Mobile View */}
