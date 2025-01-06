@@ -5,12 +5,12 @@ import Sidebar from "./Sidebar/Sidebar";
 export function Admin() {
   return (
     <div className='flex flex-row w-full'>
-      <div className="flex w-full h-screen bg-gray-100">
+      <div className="flex w-full bg-gray-100">
         <Sidebar />
 
         <div className="flex-1">
           <AdminHeader />
-
+          
           <AdminContent />
         </div>
       </div>
