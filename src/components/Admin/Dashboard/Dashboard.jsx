@@ -8,8 +8,24 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import { styled } from "@mui/system";
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  "&:hover": {
+    backgroundColor: "#f0f0f0",
+  },
+}));
+
+const StyledTableHead = styled(TableHead)(({ theme }) => ({
+  backgroundColor: "#4CAF50",
+  "& th": {
+    color: "white",
+    fontWeight: "semibold",
+  },
+}));
 
 function Dashboard() {
+  // const classes = useStyles();
   const [data, setData] = useState([]);  // State to store API data
   const [loading, setLoading] = useState(true);  // State to manage loading state
   const [error, setError] = useState(null);  // State to manage error messages
@@ -17,8 +33,59 @@ function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/api/member/list/');
-        setData(response.data);
+        // const response = await axios.get('http://127.0.0.1:8000/api/member/list/');
+        // setData(response.data);
+
+        const jsonData = [
+          {
+            id: 1,
+            first_name: "John",
+            last_name: "Smith",
+            email: "johnsmith@gmail.com",
+            date_of_birth: "1990-05-15",
+            phone: "555-123-4567",
+            gender: "Male",
+          },
+          {
+            id: 2,
+            first_name: "Emily",
+            last_name: "Johnson",
+            email: "emilyjohnson@gmail.com",
+            date_of_birth: "1985-11-22",
+            phone: "555-987-6543",
+            gender: "Female",
+          },
+          {
+            id: 3,
+            first_name: "Michael",
+            last_name: "Williams",
+            email: "michaelwilliams@gmail.com",
+            date_of_birth: "1992-03-10",
+            phone: "555-555-1212",
+            gender: "Male",
+          },
+          {
+            id: 4,
+            first_name: "Jessica",
+            last_name: "Brown",
+            email: "jessicabrown@gmail.com",
+            date_of_birth: "1988-07-04",
+            phone: "555-321-7890",
+            gender: "Female",
+          },
+          {
+            id: 5,
+            first_name: "David",
+            last_name: "Jones",
+            email: "davidjones@gmail.com",
+            date_of_birth: "1995-09-18",
+            phone: "555-789-4561",
+            gender: "Male",
+          },
+        ];
+
+        // Set data using JSON
+        setData(jsonData);
       } catch (err) {
         setError(err);
       } finally {
@@ -31,31 +98,32 @@ function Dashboard() {
 
   return (
     <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 650 }} aria-label="simple table">
-        <TableHead>
+      <Table>
+        <StyledTableHead>
           <TableRow>
             <TableCell>Member ID</TableCell>
-            <TableCell align="right">First Name</TableCell>
-            <TableCell align="right">Last Name</TableCell>
-            <TableCell align="right">Email Address</TableCell>
-            <TableCell align="right">Date of Birth</TableCell>
-            <TableCell align="right">Phone</TableCell>
-            <TableCell align="right">Gender</TableCell>
+            <TableCell align="left">First Name</TableCell>
+            <TableCell align="left">Last Name</TableCell>
+            <TableCell align="left">Email Address</TableCell>
+            <TableCell align="left">Date of Birth</TableCell>
+            <TableCell align="left">Phone</TableCell>
+            <TableCell align="left">Gender</TableCell>
           </TableRow>
-        </TableHead>
+        </StyledTableHead>
+
         <TableBody>
           {data.map((row, index) => (
-            <TableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+            <StyledTableRow key={index} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
               <TableCell component="th" scope="row">
                 {row.id}
               </TableCell>
-              <TableCell align="right">{row.first_name}</TableCell>
-              <TableCell align="right">{row.last_name}</TableCell>
-              <TableCell align="right">{row.email}</TableCell>
-              <TableCell align="right">{row.date_of_birth}</TableCell>
-              <TableCell align="right">{row.phone}</TableCell>
-              <TableCell align="right">{row.gender}</TableCell>
-            </TableRow>
+              <TableCell align="left">{row.first_name}</TableCell>
+              <TableCell align="left">{row.last_name}</TableCell>
+              <TableCell align="left">{row.email}</TableCell>
+              <TableCell align="left">{row.date_of_birth}</TableCell>
+              <TableCell align="left">{row.phone}</TableCell>
+              <TableCell align="left">{row.gender}</TableCell>
+            </StyledTableRow>
           ))}
         </TableBody>
       </Table>
