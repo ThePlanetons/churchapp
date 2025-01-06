@@ -1,10 +1,19 @@
-import { Dashboard } from "./Dashboard/Dashboard";
-import { MemberContent } from "./Member/member/MemberContent";
+import AdminContent from "./AdminContent";
+import AdminHeader from "./AdminHeader";
+import Sidebar from "./Sidebar/Sidebar";
 
 export function Admin() {
   return (
-    <div>
-       <MemberContent />
+    <div className='flex flex-row w-full'>
+      <div className="flex w-full h-screen bg-gray-100">
+        <Sidebar />
+
+        <div className="flex-1">
+          <AdminHeader />
+
+          <AdminContent />
+        </div>
+      </div>
     </div>
   );
 }

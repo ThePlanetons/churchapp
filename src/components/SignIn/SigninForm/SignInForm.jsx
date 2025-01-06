@@ -71,7 +71,7 @@ export function SignInForm() {
             </a>
           </div>
           <div className='flex justify-center'>
-            <Button variant="contained" color="primary" component={Link} to="/admin" sx={{
+            <Button variant="contained" color="primary" component={Link} to="/admin/dashboard" sx={{
               color: 'black',
               borderRadius: '2xl',
               boxShadow: 'md',
