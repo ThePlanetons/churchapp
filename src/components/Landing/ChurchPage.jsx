@@ -47,9 +47,11 @@ export function ChurchPage() {
                 <h1 className="self-center text-3xl font-extrabold leading-tight text-center text-black max-md:text-center max-md:mr-0 mr-7">
                   Church Happens Here
                 </h1>
-                <div className="flex overflow-hidden  flex-col mt-11 rounded-xl bg-white bg-opacity-0 shadow-[0px_4px_8px_rgba(0,0,0,0.17)] max-md:mt-10 max-md:max-w-full">
-                  <iframe width="1080" height="630" src="https://www.youtube.com/embed/4wIYopgrDMI?si=77BXANPhvhExmxAI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                <div className="flex overflow-hidden  flex-col mt-11 h-60 rounded-xl bg-opacity-0 shadow-[0px_4px_8px_rgba(0,0,0,0.17)]">
+                <div className="relative w-full overflow-hidden rounded-xl md:h-60" style={{ paddingBottom: '80%' }} >
+                  <iframe className="absolute top-0 left-0 w-full h-full" src="https://www.youtube.com/embed/4wIYopgrDMI?si=77BXANPhvhExmxAI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                 </div>
+              </div>
               </div>
             </div>
             <aside className="flex flex-col ml-5 w-[31%] max-md:ml-0 max-md:w-full">
