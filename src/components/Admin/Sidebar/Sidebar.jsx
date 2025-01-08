@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Users } from 'lucide-react';
+import { Home, Users, User, HandCoins} from 'lucide-react';
 import SidebarItem from './SidebarItem';
 
 function Sidebar() {
@@ -12,6 +12,8 @@ function Sidebar() {
       <nav className="px-4">
         <SidebarItem icon={<Home />} text="Home" to="/admin/dashboard" active />
         <SidebarItem icon={<Users />} text="Member" to="/admin/member" />
+        <SidebarItem icon={<User />} text="User" to="/admin/user" />
+        <SidebarItem icon={<HandCoins />}text="Collections" to="/admin/collections" />
       </nav>
     </div>
   );

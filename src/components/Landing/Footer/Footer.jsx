@@ -46,8 +46,7 @@ import XIcon from '@mui/icons-material/X';
 
 export function Footer() {
   return (
-    <div className='pt-8' >
-    <footer className="w-full bg-zinc-800 text-white">
+    <footer className="w-full mt-8 rounded-t-xl bg-zinc-800 text-white">
       {/* Social Media Icons */}
       <div className="flex justify-center gap-4 py-6">
         <a href="#" className="bg-[#91D0C8] p-2 rounded-full hover:opacity-80 transition-opacity">
@@ -65,7 +64,7 @@ export function Footer() {
       </div>
 
       {/* Main Navigation */}
-      <nav className="flex justify-center gap-6 text-sm uppercase tracking-wider py-4">
+      <nav className="flex justify-center gap-6 text-sm uppercase tracking-wider pb-4 px-4">
         <a href="#" className="hover:text-[#91D0C8] transition-colors">Home</a>
         <a href="#" className="hover:text-[#91D0C8] transition-colors">About</a>
         <a href="#" className="hover:text-[#91D0C8] transition-colors">Story</a>
@@ -96,6 +95,5 @@ export function Footer() {
         </div>
       </div>
     </footer>
-    </div>
   );
 };
