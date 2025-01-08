@@ -12,111 +12,109 @@ export function MemberContent() {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen">
-      <div className="flex-1 overflow-hidden bg-gray-100">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-center p-4 bg-white shadow-md sticky top-0 z-10">
-          {/* Dynamic Heading */}
-          <h3 className="text-base sm:text-lg lg:text-xl font-medium">
-            {showAddMember ? "Add Member" : "Member List"}
-          </h3>
-          {/* Dynamic Button */}
-          <button
-            className="flex items-center px-3 sm:px-4 py-2 bg-amber-100 text-amber-900 rounded-lg text-sm sm:text-base"
-            onClick={toggleAddMember}
-          >
-            <PenSquare className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-            {showAddMember ? "Close" : "Add Member"}
-          </button>
-        </div>
+    <div className="flex flex-col rounded-lg shadow-md bg-white">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-center p-4">
+        {/* Dynamic Heading */}
+        <h3 className="text-base sm:text-lg lg:text-xl font-medium">
+          {showAddMember ? "Add Member" : "Member List"}
+        </h3>
+        {/* Dynamic Button */}
+        <button
+          className="flex items-center px-3 sm:px-4 py-2 bg-amber-100 text-amber-900 rounded-lg text-sm sm:text-base"
+          onClick={toggleAddMember}
+        >
+          <PenSquare className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+          {showAddMember ? "Close" : "Add Member"}
+        </button>
+      </div>
 
-        {/* Scrollable Content */}
-        <div className="h-[calc(100vh-64px)] overflow-y-auto p-4">
-          {showAddMember ? (
-            // Add Member Form
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h4 className="text-lg font-semibold mb-4">Add New Member</h4>
-              <form className="space-y-4">
-                {/* Name and Surname */}
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <input
-                    type="text"
-                    placeholder="Name"
-                    className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-200"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Surname"
-                    className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-200"
-                  />
-                </div>
-
-                {/* Date of Birth */}
-                <input
-                  type="date"
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-200"
-                />
-
-                {/* Email and Phone */}
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <input
-                    type="email"
-                    placeholder="Email ID"
-                    className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-200"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Phone Number"
-                    className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-200"
-                  />
-                </div>
-
-                {/* Gender and Attend Church */}
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <select
-                    className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-200"
-                  >
-                    <option value="">Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                  </select>
-                  <select
-                    className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-200"
-                  >
-                    <option value="">Attend Church</option>
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
-                  </select>
-                </div>
-
-                {/* Referral ID */}
+      {/* Scrollable Content */}
+      <div className="">
+        {showAddMember ? (
+          // Add Member Form
+          <div className=" p-6">
+            {/* <h4 className="text-lg font-semibold mb-4">Add New Member</h4> */}
+            <form className="space-y-4">
+              {/* Name and Surname */}
+              <div className="flex flex-col sm:flex-row gap-4">
                 <input
                   type="text"
-                  placeholder="Referral ID"
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-200"
+                  placeholder="Name"
+                  className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-200"
                 />
-
-                {/* Message */}
-                <textarea
-                  placeholder="Enter Your Message"
-                  rows="4"
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-200"
+                <input
+                  type="text"
+                  placeholder="Surname"
+                  className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-200"
                 />
+              </div>
 
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  className="w-full bg-amber-500 text-white py-2 rounded-lg hover:bg-amber-600 transition"
+              {/* Date of Birth */}
+              <input
+                type="date"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-200"
+              />
+
+              {/* Email and Phone */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <input
+                  type="email"
+                  placeholder="Email ID"
+                  className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-200"
+                />
+                <input
+                  type="text"
+                  placeholder="Phone Number"
+                  className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-200"
+                />
+              </div>
+
+              {/* Gender and Attend Church */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <select
+                  className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-200"
                 >
-                  Submit
-                </button>
-              </form>
-            </div>
-          ) : (
-            // Member List
-            <MemberList members={members} />
-          )}
-        </div>
+                  <option value="">Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+                <select
+                  className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-200"
+                >
+                  <option value="">Attend Church</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+
+              {/* Referral ID */}
+              <input
+                type="text"
+                placeholder="Referral ID"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-200"
+              />
+
+              {/* Message */}
+              <textarea
+                placeholder="Enter Your Message"
+                rows="4"
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-200"
+              />
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                className="w-full bg-amber-500 text-white py-2 rounded-lg hover:bg-amber-600 transition"
+              >
+                Submit
+              </button>
+            </form>
+          </div>
+        ) : (
+          // Member List
+          <MemberList members={members} />
+        )}
       </div>
     </div>
   );

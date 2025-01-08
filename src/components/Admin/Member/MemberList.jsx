@@ -7,6 +7,8 @@ export function MemberList() {
   const [loading, setLoading] = useState(true); // State to manage loading state
   const [error, setError] = useState(null); // State to manage error messages
 
+  get(url)
+  post(url, data)
   useEffect(() => {
     const fetchMembers = async () => {
       try {
@@ -31,7 +33,8 @@ export function MemberList() {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow">
+    <div className="">
+      
       {members.map((member, index) => (
         <MemberCard key={index} member={member} />
       ))}

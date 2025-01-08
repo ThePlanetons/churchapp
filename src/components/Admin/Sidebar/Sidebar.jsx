@@ -5,7 +5,7 @@ import SidebarItem from './SidebarItem';
 
 function Sidebar() {
   return (
-    <div className="w-64 bg-gray-300">
+    <div className="w-64">
       <div className="p-5">
         <h1 className="text-xl font-semibold">Church Name</h1>
       </div>

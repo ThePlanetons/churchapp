@@ -7,7 +7,7 @@ export function WelcomeSection() {
   ]
 
   return (
-    <div className="hidden md:flex justify-center items-center w-1/2 min-h-screen bg-gray-50 p-8 rounded-lg">
+    <div className="hidden md:flex justify-center items-center w-1/2 bg-gray-50 p-8 rounded-lg">
         <div className="max-w-md mx-10px">
           <h1 className="text-4xl font-bold mb-6 ">Welcome to our community</h1>
           <p className="text-gray-600 mb-8">XYZ</p>

@@ -14,8 +14,6 @@ function App() {
   return (
     <>
       <AppRouter />
-      {/* <SignIn /> */}
-      {/* <ChurchPage/> */}
     </>
   )
 }

@@ -5,7 +5,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 export function MemberHeader() {
   return (
-    <header className="flex items-center justify-between bg-white border-b px-6 py-5">
+    <div className="flex items-center justify-between bg-white border-b px-6 py-5">
       {/* <div className="flex items-center space-x-4"> */}
         {/* <ChevronLeft className="w-6 h-6 text-gray-600" /> */}
         <MenuIcon className="text-gray-600" />
@@ -13,6 +13,6 @@ export function MemberHeader() {
       {/* </div> */}
 
       <MoreVertIcon className="text-gray-600" />
-    </header>
+    </div>
   );
 }

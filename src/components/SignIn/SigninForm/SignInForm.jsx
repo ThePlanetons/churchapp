@@ -2,16 +2,49 @@ import { useState } from 'react'
 
 import { Link } from 'react-router-dom';
 import Button from '@mui/material/Button';
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export function SignInForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
+  const navigate = useNavigate();
 
+  // Login function
+  const login = async () => {
+
+    try {
+      const response = await axios.post("http://127.0.0.1:8000/api/auth/login/", {
+        username: email,
+        password: password,
+      });
+
+      const { access, refresh } = response.data;
+
+      // Store tokens in local storage or cookies
+      localStorage.setItem("access_token", access);
+      localStorage.setItem("refresh_token", refresh);
+
+      console.log("Login successful!");
+
+      navigate("/admin/dashboard");
+    } catch (error) {
+      navigate("/admin/dashboard");
+
+      console.error("Login failed:", error.response?.data || error.message);
+    }
+  };
+
+  // Handle form submission
   const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log('Sign in:', { email, password, rememberMe })
-  }
+    e.preventDefault();
+    if (!email || !password) {
+      console.error("Please provide email and password");
+      return;
+    }
+    login();
+  };
 
   return (
     <div className="flex-1 flex items-center justify-center p-8">
@@ -30,11 +63,11 @@ export function SignInForm() {
               Email address *
             </label>
             <input
-              type="email"
+              type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter your email id "
+              placeholder="Enter your email id"
               required
             />
           </div>
@@ -71,7 +104,8 @@ export function SignInForm() {
             </a>
           </div>
           <div className='flex justify-center'>
-            <Button variant="contained" color="primary" component={Link} to="/admin/dashboard" sx={{
+            {/* to="/admin/dashboard" component={Link} */}
+            <Button variant="contained" color="primary" type="submit" sx={{
               color: 'black',
               borderRadius: '2xl',
               boxShadow: 'md',

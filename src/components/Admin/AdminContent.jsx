@@ -5,12 +5,12 @@ import { MemberContent } from './Member/MemberContent';
 
 function AdminContent() {
   return (
-    <div className='p-4 sm:p-6 lg:p-7'>
+    <main className='m-4 sm:m-6 lg:m-7'>
       <Routes>
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="member" element={<MemberContent />} />
       </Routes>
-    </div>
+    </main>
   );
 }
 
