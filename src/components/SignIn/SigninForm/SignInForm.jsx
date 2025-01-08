@@ -20,11 +20,11 @@ export function SignInForm() {
         password: password,
       });
 
-      const { access, refresh } = response.data;
+      const { refresh, access } = response.data.token;
 
       // Store tokens in local storage or cookies
-      localStorage.setItem("access_token", access);
       localStorage.setItem("refresh_token", refresh);
+      localStorage.setItem("access_token", access);
 
       console.log("Login successful!");
 

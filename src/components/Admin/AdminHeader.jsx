@@ -4,7 +4,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 function AdminHeader() {
   return (
-    <header className="sticky top-0 flex items-center justify-between bg-white border-b px-6 py-5">
+    <header className="sticky top-0 z-10 flex items-center justify-between bg-white border-b px-6 py-5">
       <MenuIcon className="text-gray-600" />
 
       <MoreVertIcon className="text-gray-600" />
