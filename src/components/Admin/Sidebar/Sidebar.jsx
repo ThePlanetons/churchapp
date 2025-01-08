@@ -1,6 +1,5 @@
 import React from 'react';
-import { Home, Users, Layers, HelpCircle } from 'lucide-react';
-import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import { Home, Users } from 'lucide-react';
 import SidebarItem from './SidebarItem';
 
 function Sidebar() {
@@ -13,9 +12,6 @@ function Sidebar() {
       <nav className="px-4">
         <SidebarItem icon={<Home />} text="Home" to="/admin/dashboard" active />
         <SidebarItem icon={<Users />} text="Member" to="/admin/member" />
-        {/* <SidebarItem icon={<PersonOutlineIcon />} text="User" to="/admin/member" /> */}
-        <SidebarItem icon={<Layers />} text="Collection" to="/collection" />
-        <SidebarItem icon={<HelpCircle />} text="Help" to="/help" />
       </nav>
     </div>
   );

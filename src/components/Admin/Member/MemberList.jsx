@@ -7,8 +7,6 @@ export function MemberList() {
   const [loading, setLoading] = useState(true); // State to manage loading state
   const [error, setError] = useState(null); // State to manage error messages
 
-  get(url)
-  post(url, data)
   useEffect(() => {
     const fetchMembers = async () => {
       try {
