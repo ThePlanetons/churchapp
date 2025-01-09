@@ -94,7 +94,7 @@ export function MemberContent() {
             {showAddMember ? "Add Member" : "Member List"}
           </h3>
           <button
-            className="flex items-center px-3 sm:px-4 py-2 bg-amber-100 text-amber-900 rounded-lg text-sm sm:text-base"
+            className="flex items-center px-3 sm:px-4 py-2 bg-amber-200 text-amber-900 rounded-lg text-sm sm:text-base"
             onClick={toggleAddMember}
           >
             <PenSquare className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
