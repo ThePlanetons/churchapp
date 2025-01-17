@@ -9,13 +9,14 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import AdminLayout from './layout/AdminLayout';
 import AdminDashboard from './components/admin/AdminDashboard';
 import UsersPage from './components/admin/UserPage';
-
+import {ChurchPage} from './components/Landing/ChurchPage'
 function App() {
   // const [count, setCount] = useState(0)
 
   return (
     <BrowserRouter>
       <Routes>
+      <Route path="/" element={<ChurchPage />} />
         {/* Landing routes */}
         {/* <Route element={<LandingLayout />}>
           <Route path="/" element={<LandingPage />} />
