@@ -1,11 +1,11 @@
 import { useState } from "react";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -21,30 +21,38 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const DynamicFormField = () => {
-  const [showForm, setShowForm] = useState(false);
+interface EditDialogProps {
+  onSave: (data: {
+    checked: boolean;
+    description: string;
+    label: string;
+    name: string;
+    placeholder: string;
+    required: boolean;
+    rowIndex: number;
+    type: string;
+    variant: string;
+  }) => void;
+}
+
+const DynamicFormField = ({ onSave }: EditDialogProps) => {
+  const [isOpen, setIsOpen] = useState(false);
   const [inputData, setInputData] = useState({
     checked: true,
     description: "",
-    disabled: false,
+    // disabled: false,
     label: "",
     name: "",
     placeholder: "",
     required: false,
     rowIndex: 0,
     type: "",
-    value: "",
-    variant: "",
+    variant: "Input",
   });
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value, type, checked } = e.target as HTMLInputElement;
-    setInputData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setInputData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSelectChange = (value: string) => {
@@ -52,14 +60,27 @@ const DynamicFormField = () => {
   };
 
   const handleSave = () => {
-    console.log("Saved Input Data:", JSON.stringify(inputData, null, 2));
-    setShowForm(false);
+    const dataObject = {
+      checked: inputData.required,
+      description: inputData.description,
+      label: inputData.label,
+      name: inputData.label, // Can be customized as needed
+      placeholder: inputData.placeholder,
+      required: inputData.required,
+      rowIndex: 0,
+      type: inputData.type,
+      variant: "Input",
+    };
+
+    onSave(dataObject);
+
+    setIsOpen(false);
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="rounded-full" variant="outline">
+        <Button className="rounded-full" variant="outline" onClick={() => setIsOpen(true)}>
           Input
         </Button>
       </DialogTrigger>
@@ -67,6 +88,10 @@ const DynamicFormField = () => {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Edit Input Field</DialogTitle>
+
+          <DialogDescription>
+            Update the input field details below.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-5 py-2">
@@ -108,7 +133,7 @@ const DynamicFormField = () => {
             </div>
 
             <div>
-              <Label htmlFor="type">Type</Label>
+              <Label htmlFor="type">Input Type</Label>
               <Select
                 value={inputData.type}
                 onValueChange={handleSelectChange}
@@ -127,16 +152,11 @@ const DynamicFormField = () => {
             </div>
           </div>
 
-          <div className="flex items-center space-x-2 rounded-md border p-4 shadow">
-            <Checkbox
-              id="required"
-              name="required"
-              checked={inputData.required}
-             // onChange={handleInputChange}
-            />
-            <Label htmlFor="required" className="text-sm font-medium">
-              Mark as Required Field
-            </Label>
+          <div className="flex items-center gap-2">
+            <Checkbox id="required" checked={inputData.required} onCheckedChange={(checked) =>
+              setInputData((prev) => ({ ...prev, required: !!checked }))
+            } />
+            <Label htmlFor="required">Mark as Required Field</Label>
           </div>
         </div>
 
