@@ -9,14 +9,19 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import AdminLayout from './layout/AdminLayout';
 import AdminDashboard from './components/admin/AdminDashboard';
 import UsersPage from './components/admin/UserPage';
-import {ChurchPage} from './components/Landing/ChurchPage'
+import { ChurchPage } from './components/Landing/ChurchPage'
+import { SignIn } from './components/auth/sign-in/sign-in';
+
 function App() {
   // const [count, setCount] = useState(0)
 
   return (
     <BrowserRouter>
       <Routes>
-      <Route path="/" element={<ChurchPage />} />
+        <Route path="/" element={<ChurchPage />} />
+
+        <Route path="/sign-in" element={<SignIn />} />
+
         {/* Landing routes */}
         {/* <Route element={<LandingLayout />}>
           <Route path="/" element={<LandingPage />} />

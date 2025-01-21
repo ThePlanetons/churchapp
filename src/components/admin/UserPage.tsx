@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import axios from "axios";
 //import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
@@ -26,10 +27,16 @@ interface FormData {
 
 const UsersPage = () => {
   const [dynamicFields, setDynamicFields] = useState<FormData[]>([]);
+  const [dynamicPayload, setDynamicPayload] = useState<any[]>([]);
 
   // Example of receiving data from a child component or any other source
   const receiveDataFromChild = (data: FormData) => {
     setDynamicFields((prevFields) => [...prevFields, data]);  // Append new data to existing fields
+
+    setDynamicPayload((prevFields: any) => [
+      ...prevFields, 
+      { dynamic_input: data }
+    ]);
   };
 
   // const formSchema = z.object({
@@ -64,17 +71,44 @@ const UsersPage = () => {
 
   // Handle form submission
   function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      console.log("Form data submitted:", values);
-      toast(
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-        </pre>
-      );
-    } catch (error) {
-      console.error("Form submission error:", error);
-      toast.error("Failed to submit the form. Please try again.");
+    const apiUrl = "http://127.0.0.1:8000/api/member/config/list/";
+    let accessToken = localStorage.getItem("access_token");
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    };
+
+    const payload = {
+      data: dynamicPayload
     }
+
+    axios
+      .post(apiUrl, payload, config)
+      .then((response) => {
+        // Handle success
+        console.log("Response:", response.data);
+        alert("Form submitted successfully!");
+      })
+      .catch((error) => {
+        // Handle error
+        console.error("Error:", error);
+        alert("Failed to submit the form. Please try again.");
+      });
+    // try {
+    //   console.log(dynamicFields)
+    //   console.log("Form data submitted:", values);
+    //   toast(
+    //     <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+    //       <code className="text-white">{JSON.stringify(values, null, 2)}</code>
+    //     </pre>
+    //   );
+    // } catch (error) {
+    //   console.error("Form submission error:", error);
+    //   toast.error("Failed to submit the form. Please try again.");
+    // }
   }
 
   return (
