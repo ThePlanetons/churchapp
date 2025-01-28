@@ -12,6 +12,7 @@ import UsersPage from './components/admin/UserPage';
 import { ChurchPage } from './components/Landing/ChurchPage'
 import { SignIn } from './components/auth/sign-in/sign-in';
 import MemberManagement from './components/admin/member/member';
+import Settings from './components/admin/settings';
 
 function App() {
   // const [count, setCount] = useState(0)
@@ -34,6 +35,7 @@ function App() {
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/member" element={<UsersPage />} />
           <Route path="/admin/members" element={<MemberManagement />} />
+          <Route path="/admin/settings" element={<Settings />} />
         </Route>
       </Routes>
     </BrowserRouter>

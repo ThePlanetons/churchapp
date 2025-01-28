@@ -36,7 +36,7 @@ const items = [
   },
   {
     title: "Settings",
-    url: "#",
+    url: "/admin/settings",
     icon: Settings,
   },
 ]
