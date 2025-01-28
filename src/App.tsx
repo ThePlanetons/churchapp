@@ -11,6 +11,7 @@ import AdminDashboard from './components/admin/AdminDashboard';
 import UsersPage from './components/admin/UserPage';
 import { ChurchPage } from './components/Landing/ChurchPage'
 import { SignIn } from './components/auth/sign-in/sign-in';
+import MemberManagement from './components/admin/member/member';
 
 function App() {
   // const [count, setCount] = useState(0)
@@ -32,6 +33,7 @@ function App() {
         <Route element={<AdminLayout />}>
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/admin/member" element={<UsersPage />} />
+          <Route path="/admin/members" element={<MemberManagement />} />
         </Route>
       </Routes>
     </BrowserRouter>

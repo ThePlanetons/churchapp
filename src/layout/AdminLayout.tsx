@@ -1,6 +1,8 @@
+import { Outlet } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { Toaster } from "@/components/ui/toaster";
+
 import { AppSidebar } from "@/components/admin/app-sidebar";
-import { Outlet } from "react-router-dom"; // Import Outlet to render nested routes
 
 const AdminLayout = () => {
   return (
@@ -18,6 +20,8 @@ const AdminLayout = () => {
         <main className="flex-1 p-6 bg-gray-100">
           <Outlet /> {/* Renders the nested route (AdminDashboard or UsersPage) */}
         </main>
+
+        <Toaster />
       </div>
     </SidebarProvider>
   );
