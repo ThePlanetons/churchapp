@@ -12,6 +12,7 @@ import AdminLayout from './layout/AdminLayout';
 import AdminDashboard from './components/admin/AdminDashboard';
 import UsersPage from './components/admin/UserPage';
 import MemberManagement from './components/admin/member/member';
+import Entity from './components/admin/entity/entity';
 import Settings from './components/admin/settings';
 
 function App() {
@@ -36,6 +37,7 @@ function App() {
           <Route path="/admin/member" element={<UsersPage />} />
           <Route path="/admin/members" element={<MemberManagement />} />
           <Route path="/admin/settings" element={<Settings />} />
+          <Route path="/admin/entity" element={<Entity />} />
         </Route>
       </Routes>
     </BrowserRouter>

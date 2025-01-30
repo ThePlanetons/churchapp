@@ -30,8 +30,8 @@ const items = [
     icon: Calendar,
   },
   {
-    title: "Search",
-    url: "#",
+    title: "Entity",
+    url: "/admin/entity",
     icon: Search,
   },
   {
