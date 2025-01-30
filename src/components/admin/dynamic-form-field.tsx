@@ -1,25 +1,10 @@
 import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface EditDialogProps {
   onSave: (data: {
@@ -63,12 +48,20 @@ const DynamicFormField = ({ onSave }: EditDialogProps) => {
     setIsOpen(true);
   };
 
+  const generateTimestampBasedString = () => {
+    const now = new Date();
+    const timestamp = now.getTime();  // Get the current timestamp (milliseconds)
+    const formattedDate = now.toISOString().replace(/[-:.]/g, '');  // Format it to remove dashes, colons, and periods
+
+    return `${formattedDate}_${timestamp}`;
+  };
+
   const handleSave = () => {
     const dataObject = {
       checked: inputData.required,
       description: inputData.description,
       label: inputData.label,
-      name: inputData.label, // Can be customized as needed
+      name: `${inputData.label.replace(/\s+/g, '_').toLowerCase()}_${generateTimestampBasedString()}`,  // Appending timestamp-based string
       placeholder: inputData.placeholder,
       required: inputData.required,
       rowIndex: 0,
@@ -180,9 +173,7 @@ const DynamicFormField = ({ onSave }: EditDialogProps) => {
           </div>
 
           <DialogFooter className="sm:justify-end">
-            <Button type="button" onClick={handleSave}>
-              Save changes
-            </Button>
+            <Button type="button" onClick={handleSave}>Save changes</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -6,11 +6,11 @@
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
+import { ChurchPage } from './components/Landing/ChurchPage'
+import { SignIn } from './components/auth/sign-in/sign-in';
 import AdminLayout from './layout/AdminLayout';
 import AdminDashboard from './components/admin/AdminDashboard';
 import UsersPage from './components/admin/UserPage';
-import { ChurchPage } from './components/Landing/ChurchPage'
-import { SignIn } from './components/auth/sign-in/sign-in';
 import MemberManagement from './components/admin/member/member';
 import Settings from './components/admin/settings';
 
