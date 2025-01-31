@@ -56,7 +56,7 @@ function EntityList({ onAddMember, onConfigureMember }: { onAddMember: (memberDa
 
   useEffect(() => {
     axios
-      .get("http://127.0.0.1:8000/api/member/list/")
+      .get("http://127.0.0.1:8000/api/entities/")
       .then((response) => {
         setMembers(response.data);
       })
@@ -92,7 +92,6 @@ function EntityList({ onAddMember, onConfigureMember }: { onAddMember: (memberDa
         <div className="text-2xl font-semibold">Entity List</div>
 
         <div className="flex flex-row gap-3">
-
           <Button onClick={() => onAddMember(null)}>
             <Pencil /> Add Entity
           </Button>
