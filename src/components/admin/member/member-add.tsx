@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import axios from "axios";
 import { z } from "zod";
 import { format } from "date-fns"
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Check, CircleX, SquareX, Trash, X } from "lucide-react";
 
 const genderOptions = [
   { value: "Male", label: "Male" },
@@ -30,7 +30,7 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
 
   useEffect(() => {
     axios
-      .get("http://127.0.0.1:8000/api/member/config/list/")
+      .get("http://127.0.0.1:8000/api/members/config/")
       .then((response) => {
         setConfigData(response.data);
         setLoading(false);
@@ -132,8 +132,8 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
     };
 
     const request = memberData
-      ? axios.put(`http://127.0.0.1:8000/api/member/${memberData.id}/`, requestData, config) // Update request for editing
-      : axios.post("http://127.0.0.1:8000/api/member/list/", requestData, config); // Create request for adding
+      ? axios.put(`http://127.0.0.1:8000/api/members/${memberData.id}/`, requestData, config) // Update request for editing
+      : axios.post("http://127.0.0.1:8000/api/members/", requestData, config); // Create request for adding
 
     request
       .then(() => {
@@ -209,8 +209,21 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
           <div className="text-2xl font-bold">{memberData ? "Edit Member" : "Add Member"}</div>
 
           <div className="flex gap-3">
-            <Button type="button" onClick={onClose} variant="outline">Close</Button>
-            <Button type="button" onClick={() => form.handleSubmit(onSubmit)()}>Save</Button>
+            <Button type="button" onClick={onClose} variant="secondary">
+              <X />
+              Close
+            </Button>
+
+            <Button type="button" onClick={() => form.handleSubmit(onSubmit)()}>
+              <Check />
+              Save
+            </Button>
+
+            {memberData && (
+              <Button type="button" variant="destructive">
+                <Trash /> Delete
+              </Button>
+            )}
           </div>
         </div>
 

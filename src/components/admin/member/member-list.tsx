@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Bolt, Pencil } from "lucide-react";
+import { ArrowDown, ArrowUp, Bolt, MoreHorizontal, Pencil } from "lucide-react";
 import axios from "axios";
 
 import { Button } from "@/components/ui/button";
@@ -25,122 +25,86 @@ type Member = {
   dynamic_fields: Record<string, any>;
 }
 
+const SortableHeader = ({ column, title }: { column: any; title: string }) => {
+  const isSorted = column.getIsSorted();
+
+  return (
+    <div
+      className="flex flex-row items-center cursor-pointer"
+      onClick={() => column.toggleSorting(isSorted === "asc")}
+    >
+      {title}
+      {isSorted === "asc" && <ArrowUp className="ml-2 h-4 w-4" />}
+      {isSorted === "desc" && <ArrowDown className="ml-2 h-4 w-4" />}
+    </div>
+  );
+};
+
+const handleMoreOptions = (e: React.MouseEvent, member: any) => {
+  e.stopPropagation(); // Prevents triggering other row actions
+  // Open your modal or dropdown here, like "View", "Edit", "Delete"
+  console.log("More options clicked for", member);
+};
+
 const columns: ColumnDef<Member>[] = [
   {
-    accessorKey: "id",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          ID
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
-    // header: () => <div className="text-left font-bold">ID</div>,
+    accessorKey: "actions",
+    header: "Actions", // Optional header for the actions column
     cell: ({ row }) => {
-      const member = row.original;
-      return <div className="font-medium">{member.id}</div>;
+      const member = row.original; // Get the row data for actions
+
+      return (
+        <div className="flex justify-center">
+          <button
+            onClick={(e) => handleMoreOptions(e, member)} // Trigger your custom handler
+            className="p-2"
+          >
+            <MoreHorizontal className="h-5 w-5 text-gray-500" />
+          </button>
+        </div>
+      );
     },
+  },
+  {
+    accessorKey: "id",
+    header: ({ column }) => <SortableHeader column={column} title="ID" />,
   },
   {
     accessorKey: "first_name",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          First Name
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <SortableHeader column={column} title="First Name" />,
   },
   {
     accessorKey: "last_name",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Last Name
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <SortableHeader column={column} title="Last Name" />,
   },
   {
     accessorKey: "email",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Email
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <SortableHeader column={column} title="Email" />,
   },
   {
     accessorKey: "date_of_birth",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          DOB
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <SortableHeader column={column} title="DOB" />,
   },
   {
     accessorKey: "phone",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Phone
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <SortableHeader column={column} title="Phone" />,
   },
   {
     accessorKey: "gender",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Gender
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <SortableHeader column={column} title="Gender" />,
   },
 ];
 
 function MemberList({ onAddMember, onConfigureMember }: { onAddMember: (memberData: any) => void; onConfigureMember: () => void }) {
-  const [sorting, setSorting] = React.useState<SortingState>([])
+  const { toast } = useToast();
+  const [sorting, setSorting] = React.useState<SortingState>([{ id: "id", desc: false }])
 
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const { toast } = useToast();
 
   useEffect(() => {
     axios
-      .get("http://127.0.0.1:8000/api/member/list/")
+      .get(`${import.meta.env.VITE_API_URL}members/`)
       .then((response) => {
         setMembers(response.data);
       })
@@ -148,7 +112,7 @@ function MemberList({ onAddMember, onConfigureMember }: { onAddMember: (memberDa
         toast({
           variant: "destructive",
           title: "Uh oh! Something went wrong.",
-          description: error,
+          description: 'error',
         });
       })
       .finally(() => setLoading(false));
@@ -163,16 +127,14 @@ function MemberList({ onAddMember, onConfigureMember }: { onAddMember: (memberDa
     data: members,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    state: {
-      sorting,
-    },
+    onSortingChange: setSorting,
+    state: { sorting },
+    getPaginationRowModel: getPaginationRowModel(),
   });
 
   return (
-    <div>
+    <div className="">
       <div className="flex flex-row items-center justify-between p-4 border-b">
         <div className="text-2xl font-semibold">Member List</div>
 
@@ -187,52 +149,61 @@ function MemberList({ onAddMember, onConfigureMember }: { onAddMember: (memberDa
         </div>
       </div>
 
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-
-        <TableBody>
-          {table.getRowModel().rows.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                onClick={() => handleItemClick(row.original)}
-                className="cursor-pointer h-14 hover:bg-gray-100"
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(
-                      cell.column.columnDef.cell,
-                      cell.getContext()
-                    )}
-                  </TableCell>
+      <div className="">
+        <Table>
+          <TableHeader
+            className="bg-lime-400"
+          >
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}
+                    className="h-12 text-black tracking-wide"
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                  </TableHead>
                 ))}
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No members found.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-      <div className="flex items-center justify-end space-x-2 p-4">
+            ))}
+          </TableHeader>
+
+          <TableBody>
+            {table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  onClick={() => handleItemClick(row.original)}
+                  className="cursor-pointer h-14 hover:bg-gray-200"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}
+                      className="font-medium"
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  No members found.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div className="flex items-center justify-end space-x-2 p-4 bg-lime-400 rounded-b-xl ">
         <Button
           variant="outline"
           size="sm"
@@ -250,15 +221,6 @@ function MemberList({ onAddMember, onConfigureMember }: { onAddMember: (memberDa
           Next
         </Button>
       </div>
-
-      {/* <ul className="space-y-2">
-        {members.map((member: any) => (
-          <li key={member.id} className="border rounded-md p-3 cursor-pointer hover:bg-gray-200" onClick={() => handleItemClick(member)}>
-            <p className="font-medium">{member.first_name} {member.last_name}</p>
-            <p className="text-sm text-gray-600">{member.email}</p>
-          </li>
-        ))}
-      </ul> */}
     </div >
   );
 }
