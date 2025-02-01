@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,6 +15,8 @@ import axios from "axios";
 import { z } from "zod";
 import { format } from "date-fns"
 import { CalendarIcon, Check, CircleX, SquareX, Trash, X } from "lucide-react";
+// import axiosInstance from "@/lib/axios";
+import createAxiosInstance from "@/lib/axios";
 
 const genderOptions = [
   { value: "Male", label: "Male" },
@@ -107,6 +109,11 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
     }
   }, [memberData, configData]); // Re-run when these values change
 
+  // Create the Axios instance with toast
+  // const axiosInstance = createAxiosInstance(toast);
+  const axiosInstance = useMemo(() => createAxiosInstance(toast), [toast]);
+
+
   function onSubmit(values: z.infer<typeof memberSchema>) {
     const name = localStorage.getItem("name");
 
@@ -124,16 +131,13 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
       dynamic_fields: dynamicFields,  // Store dynamic fields in JSON format
     };
 
-    const config = {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        "Content-Type": "application/json",
-      },
-    };
-
     const request = memberData
-      ? axios.put(`http://127.0.0.1:8000/api/members/${memberData.id}/`, requestData, config) // Update request for editing
-      : axios.post("http://127.0.0.1:8000/api/members/", requestData, config); // Create request for adding
+      ? axiosInstance.put(`members/${memberData.id}/`, requestData) // Update request for editing
+      : axiosInstance.post(`members/`, requestData); // Create request for adding
+
+    // const request = memberData
+    //   ? axios.put(`http://127.0.0.1:8000/api/members/${memberData.id}/`, requestData, config) // Update request for editing
+    //   : axios.post("http://127.0.0.1:8000/api/members/", requestData, config); // Create request for adding
 
     request
       .then(() => {
@@ -148,26 +152,8 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
         // Check for response status and handle accordingly
         if (error.response) {
           const { status, data } = error.response;
-
-          // Handling 401 Unauthorized with specific messages
-          if (status === 401) {
-            if (data.code === "bad_authorization_header") {
-              toast({
-                variant: "destructive",
-                title: "Error",
-                description: "bad_authorization_header",
-              });
-            } else if (data.code === "token_not_valid") {
-              toast({
-                variant: "destructive",
-                title: "Error",
-                description: "Token is invalid or expired",
-              });
-            }
-          }
-
           // Handle 404 Not Found errors (Page or Member not found)
-          else if (status === 404) {
+          if (status === 404) {
             if (data.detail === "No member matches the given query.") {
               toast({
                 variant: "destructive",
@@ -191,15 +177,74 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
               description: data.email[0], // Show the specific email error
             });
           }
-        } else {
-          // General catch if error.response is not available
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Failed to add/update member. Please try again. " + error.message,
-          });
         }
       });
+
+    // request
+    //   .then(() => {
+    //     toast({
+    //       variant: "default",
+    //       title: "Success",
+    //       description: memberData ? "Member updated successfully!" : "Member added successfully!",
+    //     });
+    //     onClose();
+    //   })
+    //   .catch((error) => {
+    //     // Check for response status and handle accordingly
+    //     if (error.response) {
+    //       const { status, data } = error.response;
+
+    //       // Handling 401 Unauthorized with specific messages
+    //       if (status === 401) {
+    //         if (data.code === "bad_authorization_header") {
+    //           toast({
+    //             variant: "destructive",
+    //             title: "Error",
+    //             description: "bad_authorization_header",
+    //           });
+    //         } else if (data.code === "token_not_valid") {
+    //           toast({
+    //             variant: "destructive",
+    //             title: "Error",
+    //             description: "Token is invalid or expired",
+    //           });
+    //         }
+    //       }
+
+    //       // Handle 404 Not Found errors (Page or Member not found)
+    //       else if (status === 404) {
+    //         if (data.detail === "No member matches the given query.") {
+    //           toast({
+    //             variant: "destructive",
+    //             title: "Member Not Found",
+    //             description: "The member you're trying to edit does not exist.",
+    //           });
+    //         } else {
+    //           toast({
+    //             variant: "destructive",
+    //             title: "Page Not Found",
+    //             description: "The requested page could not be found.",
+    //           });
+    //         }
+    //       }
+
+    //       // Handling 400 Bad Request with email issue
+    //       else if (status === 400 && data.email && data.email[0]) {
+    //         toast({
+    //           variant: "destructive",
+    //           title: "Error",
+    //           description: data.email[0], // Show the specific email error
+    //         });
+    //       }
+    //     } else {
+    //       // General catch if error.response is not available
+    //       toast({
+    //         variant: "destructive",
+    //         title: "Error",
+    //         description: "Failed to add/update member. Please try again. " + error.message,
+    //       });
+    //     }
+    //   });
   }
 
   return (

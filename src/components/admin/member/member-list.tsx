@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowDown, ArrowUp, Bolt, MoreHorizontal, Pencil } from "lucide-react";
 import axios from "axios";
 
@@ -8,6 +8,7 @@ import { ColumnDef, flexRender, getCoreRowModel, getPaginationRowModel, getSorte
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import React from "react";
 import { ArrowUpDown } from "lucide-react";
+import createAxiosInstance from "@/lib/axios";
 
 // interface DataTableProps<TData, TValue> {
 //   columns: ColumnDef<TData, TValue>[]
@@ -102,21 +103,52 @@ function MemberList({ onAddMember, onConfigureMember }: { onAddMember: (memberDa
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
+  // Create the Axios instance with toast
+  // const axiosInstance = createAxiosInstance(toast);
+  // Memoizing axiosInstance to ensure it's created once
+  // Memoize the axiosInstance to prevent re-creation on every render
+  const axiosInstance = useMemo(() => createAxiosInstance(toast), [toast]);
+
   useEffect(() => {
-    axios
-      .get(`${import.meta.env.VITE_API_URL}members/`)
+    axiosInstance
+      .get("members/")
       .then((response) => {
-        setMembers(response.data);
+        setMembers(response.data || []);
       })
       .catch((error) => {
-        toast({
-          variant: "destructive",
-          title: "Uh oh! Something went wrong.",
-          description: 'error',
-        });
+        // console.error("API Error:", error);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [axiosInstance]);
+
+  // useEffect(() => {
+  //   axios
+  //     .get(`${import.meta.env.VITE_API_URL}members/`)
+  //     .then((response) => {
+  //       setMembers(response.data || []);
+  //     })
+  //     .catch((error) => {
+  //       let errorMessage = "Something went wrong. Please try again.";
+
+  //       if (error.response) {
+  //         // Server responded with a status code (like 404, 500)
+  //         errorMessage = `Error ${error.response.status}: ${error.response.statusText}`;
+  //       } else if (error.request) {
+  //         // No response received from server (network issue)
+  //         errorMessage = "Server is not responding. Check your network or API status.";
+  //       } else {
+  //         // Other unexpected errors
+  //         errorMessage = error.message || "Unknown error occurred.";
+  //       }
+
+  //       toast({
+  //         variant: "destructive",
+  //         title: "Uh oh! Something went wrong.",
+  //         description: errorMessage,
+  //       });
+  //     })
+  //     .finally(() => setLoading(false));
+  // }, []);
 
   const handleItemClick = (member: Member) => {
     // Send selected member data to AddMember
