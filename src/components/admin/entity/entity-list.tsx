@@ -11,35 +11,35 @@ import { ArrowUpDown } from "lucide-react";
 
 type Member = {
   id: number;
-  entity_name: string;
-  entity_code: string;
+  name: string;
+  code: string;
   dynamic_fields: Record<string, any>;
 }
 
 const columns: ColumnDef<Member>[] = [
   {
-    accessorKey: "entity_name",
+    accessorKey: "name",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Entity Name
+          Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
     },
   },
   {
-    accessorKey: "entity_code",
+    accessorKey: "code",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Entity Code
+          Code
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
