@@ -11,7 +11,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 
-import DynamicFormField from "./dynamic-form-field.tsx";
+import DynamicFormField from "./member/dynamic-form-field.tsx";
 
 interface Member {
   id?: number;

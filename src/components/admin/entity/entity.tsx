@@ -1,29 +1,27 @@
 import { useState } from "react";
 
-import EntityList from "./entity-list";
-import AddEntityMember from "./entity-add";
-
 import { Card } from "@/components/ui/card";
+import EntityList from "./entity-list";
+import EntityAdd from "./entity-add";
 
 export default function Entity() {
   const [view, setView] = useState("list");
   const [selectedMember, setSelectedMember] = useState<any>(null);
 
   return (
-    <Card>
+    <Card className="h-full">
       {view === "list" && (
         <EntityList
           onAddMember={(memberData) => {
             setSelectedMember(memberData);
             setView("add");
           }}
-          onConfigureMember={() => setView("configure")}
         />
       )}
       {view === "add" && (
-        <AddEntityMember
+        <EntityAdd
           onClose={() => setView("list")}
-          memberData={selectedMember} // Pass selected member data
+          memberData={selectedMember}  // Pass selected member data
         />
       )}
 

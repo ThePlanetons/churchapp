@@ -6,15 +6,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
 import { z } from "zod";
+import { Check, Trash, X } from "lucide-react";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
-function AddEntityMember({ onClose, memberData }: { onClose: () => void; memberData?: any }) {
+type Entity = {
+  name: string;
+  code: string;
+
+  id?: number;
+  created_at?: string;
+  created_by?: string;
+  updated_at?: string;
+  updated_by?: string;
+}
+
+function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: any }) {
   const { toast } = useToast();
   const [loading, setLoading] = useState<boolean>(true);
 
   const entitySchema = z.object({
-    code: z.string().nonempty("Code is required."),
-    name: z.string().nonempty("Name is required."),
-    created_by: z.string().nonempty("Created by is required."),
+    code: z.string().nonempty("Entity Code is required."),
+    name: z.string().nonempty("Entity Name is required."),
   });
 
   const form = useForm({
@@ -22,11 +34,13 @@ function AddEntityMember({ onClose, memberData }: { onClose: () => void; memberD
     defaultValues: memberData || {
       code: "",
       name: "",
-      created_by: "",
     },
   });
 
   function onSubmit(values: z.infer<typeof entitySchema>) {
+    const name = localStorage.getItem("name");
+    (memberData ? (values as any).updated_by = name : (values as any).created_by = name);
+
     const config = {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -85,34 +99,66 @@ function AddEntityMember({ onClose, memberData }: { onClose: () => void; memberD
 
   return (
     <div>
-      <div className="flex flex-col justify-between p-4 border-b">
+      <div className="flex flex-col justify-between px-4 py-3 border-b">
         <div className="flex justify-between items-center w-full">
           <div className="text-2xl font-bold">Add Entity</div>
+
           <div className="flex gap-3">
-            <Button type="button" onClick={onClose} variant="outline">Close</Button>
-            {memberData && <Button type="button" onClick={onDelete} variant="destructive">Delete</Button>}
-            <Button type="button" onClick={() => form.handleSubmit(onSubmit)()}>Save</Button>
+            <Button type="button" onClick={onClose} variant="secondary"><X /> Close</Button>
+
+            <Button type="button" onClick={() => form.handleSubmit(onSubmit)()}><Check /> {memberData ? 'Update' : 'Save'}</Button>
+
+            {memberData && <Button type="button" onClick={onDelete} variant="destructive"><Trash /> Delete</Button>}
           </div>
         </div>
       </div>
+
       <div className="p-4">
-        <form className="grid grid-cols-1 gap-5">
-          <div>
-            <label className="block text-sm font-medium">Code</label>
-            <Input placeholder="Enter Code" {...form.register("code")} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium">Name</label>
-            <Input placeholder="Enter Name" {...form.register("name")} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium">Created By</label>
-            <Input placeholder="Enter Creator Name" {...form.register("created_by")} />
-          </div>
-        </form>
+        <Form {...form}>
+          <form className="grid grid-cols-2 gap-5">
+            <FormField
+              control={form.control}
+              name="code"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Entity Code
+                    {entitySchema.shape.code._def.checks.some((c) => c.kind === "min") && (
+                      <span className="text-destructive"> *</span>
+                    )}
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter Entity Code" {...field} />
+
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Entity Name
+                    {entitySchema.shape.code._def.checks.some((c) => c.kind === "min") && (
+                      <span className="text-destructive"> *</span>
+                    )}
+                  </FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter Entity Name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </form>
+        </Form>
       </div>
     </div>
   );
 }
 
-export default AddEntityMember;
+export default EntityAdd;

@@ -1,15 +1,8 @@
 import { Link } from "react-router-dom";
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react"
+import { Home, Inbox, Search, Settings, User, Users } from "lucide-react"
 
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
+  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem
 } from "@/components/ui/sidebar"
 
 // Menu items.
@@ -20,14 +13,14 @@ const items = [
     icon: Home,
   },
   {
-    title: "Member",
-    url: "/admin/member",
-    icon: Inbox,
+    title: "Users",
+    url: "/admin/users",
+    icon: User,
   },
   {
     title: "Members",
     url: "/admin/members",
-    icon: Calendar,
+    icon: Users,
   },
   {
     title: "Entity",

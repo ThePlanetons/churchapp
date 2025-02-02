@@ -1,56 +1,59 @@
+import React from "react";
 import { useEffect, useState } from "react";
-import { Bolt, Pencil } from "lucide-react";
+import { ArrowDown, ArrowUp, Pencil } from "lucide-react";
+import { ArrowUpDown } from "lucide-react";
 import axios from "axios";
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { ColumnDef, flexRender, getCoreRowModel, getPaginationRowModel, getSortedRowModel, SortingState, useReactTable } from "@tanstack/react-table"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import React from "react";
-import { ArrowUpDown } from "lucide-react";
 
-type Member = {
-  id: number;
+type Entity = {
   name: string;
   code: string;
-  dynamic_fields: Record<string, any>;
+
+  id?: number;
+  created_at?: string;
+  created_by?: string;
+  updated_at?: string;
+  updated_by?: string;
 }
 
-const columns: ColumnDef<Member>[] = [
+const SortableHeader = ({ column, title }: { column: any; title: string }) => {
+  const isSorted = column.getIsSorted();
+
+  return (
+    <div
+      className="flex flex-row items-center cursor-pointer"
+      onClick={() => column.toggleSorting(isSorted === "asc")}
+    >
+      {title}
+      {isSorted === "asc" && <ArrowUp className="ml-2 h-4 w-4" />}
+      {isSorted === "desc" && <ArrowDown className="ml-2 h-4 w-4" />}
+    </div>
+  );
+};
+
+const columns: ColumnDef<Entity>[] = [
   {
-    accessorKey: "name",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Name
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    accessorKey: "id",
+    header: ({ column }) => <SortableHeader column={column} title="ID" />,
   },
   {
     accessorKey: "code",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Code
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    header: ({ column }) => <SortableHeader column={column} title="Entity Code" />,
   },
+  {
+    accessorKey: "name",
+    header: ({ column }) => <SortableHeader column={column} title="Entity Name" />,
+  }
 ];
 
-function EntityList({ onAddMember, onConfigureMember }: { onAddMember: (memberData: any) => void; onConfigureMember: () => void }) {
+function EntityList({ onAddMember }: { onAddMember: (memberData: any) => void }) {
   const [sorting, setSorting] = React.useState<SortingState>([])
 
-  const [members, setMembers] = useState<Member[]>([]);
+  const [members, setMembers] = useState<Entity[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const { toast } = useToast();
 
@@ -70,7 +73,7 @@ function EntityList({ onAddMember, onConfigureMember }: { onAddMember: (memberDa
       .finally(() => setLoading(false));
   }, []);
 
-  const handleItemClick = (member: Member) => {
+  const handleItemClick = (member: Entity) => {
     onAddMember(member);
   };
 
@@ -78,17 +81,15 @@ function EntityList({ onAddMember, onConfigureMember }: { onAddMember: (memberDa
     data: members,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    state: {
-      sorting,
-    },
+    onSortingChange: setSorting,
+    state: { sorting },
+    getPaginationRowModel: getPaginationRowModel(),
   });
 
   return (
     <div>
-      <div className="flex flex-row items-center justify-between p-4 border-b">
+      <div className="flex flex-row items-center justify-between px-4 py-3 border-b">
         <div className="text-2xl font-semibold">Entity List</div>
 
         <div className="flex flex-row gap-3">
@@ -99,11 +100,14 @@ function EntityList({ onAddMember, onConfigureMember }: { onAddMember: (memberDa
       </div>
 
       <Table>
-        <TableHeader>
+        <TableHeader
+          className="bg-lime-400"
+        >
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
+                <TableHead key={header.id}
+                  className="h-14 text-black tracking-wide">
                   {header.isPlaceholder
                     ? null
                     : flexRender(
@@ -143,7 +147,8 @@ function EntityList({ onAddMember, onConfigureMember }: { onAddMember: (memberDa
           )}
         </TableBody>
       </Table>
-      <div className="flex items-center justify-end space-x-2 p-4">
+
+      <div className="flex items-center justify-end space-x-2 px-2 h-14 bg-lime-400 rounded-b-xl">
         <Button
           variant="outline"
           size="sm"

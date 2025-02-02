@@ -2,18 +2,17 @@
 // import reactLogo from './assets/react.svg'
 // import viteLogo from '/vite.svg'
 // import './App.css'
-// import { Button } from "@/components/ui/button"
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 import { ChurchPage } from './components/Landing/ChurchPage'
 import { SignIn } from './components/auth/sign-in/sign-in';
 import AdminLayout from './layout/AdminLayout';
-import AdminDashboard from './components/admin/AdminDashboard';
-import UsersPage from './components/admin/UserPage';
+import AdminDashboard from './components/admin/dashboard/dashboard';
 import MemberManagement from './components/admin/member/member';
 import Entity from './components/admin/entity/entity';
 import Settings from './components/admin/settings';
+import UserManagement from './components/admin/user/user';
 
 function App() {
   // const [count, setCount] = useState(0)
@@ -34,7 +33,7 @@ function App() {
         {/* Admin routes */}
         <Route element={<AdminLayout />}>
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/member" element={<UsersPage />} />
+          <Route path="/admin/users" element={<UserManagement />} />
           <Route path="/admin/members" element={<MemberManagement />} />
           <Route path="/admin/settings" element={<Settings />} />
           <Route path="/admin/entity" element={<Entity />} />
