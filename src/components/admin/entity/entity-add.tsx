@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
@@ -8,11 +8,11 @@ import axios from "axios";
 import { z } from "zod";
 import { Check, Trash, X } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type Entity = {
   name: string;
   code: string;
-
   id?: number;
   created_at?: string;
   created_by?: string;
@@ -22,7 +22,7 @@ type Entity = {
 
 function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: any }) {
   const { toast } = useToast();
-  const [loading, setLoading] = useState<boolean>(true);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const entitySchema = z.object({
     code: z.string().nonempty("Entity Code is required."),
@@ -70,7 +70,7 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
       });
   }
 
-  function onDelete() {
+  function handleDelete() {
     if (!memberData) return;
     const config = {
       headers: {
@@ -86,6 +86,7 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
           title: "Deleted",
           description: "Entity deleted successfully!",
         });
+        setShowDeleteConfirm(false);
         onClose();
       })
       .catch((error) => {
@@ -94,6 +95,7 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
           title: "Error",
           description: "Failed to delete entity. Please try again.",
         });
+        setShowDeleteConfirm(false);
       });
   }
 
@@ -101,14 +103,33 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
     <div>
       <div className="flex flex-col justify-between px-4 py-3 border-b">
         <div className="flex justify-between items-center w-full">
-          <div className="text-2xl font-bold">Add Entity</div>
+          <div className="text-2xl font-bold">
+            {memberData ? "Edit Entity" : "Add Entity"}
+          </div>
 
           <div className="flex gap-3">
-            <Button type="button" onClick={onClose} variant="secondary"><X /> Close</Button>
+            <Button type="button" onClick={onClose} variant="secondary">
+              <X className="mr-2 h-4 w-4" /> Close
+            </Button>
 
-            <Button type="button" onClick={() => form.handleSubmit(onSubmit)()}><Check /> {memberData ? 'Update' : 'Save'}</Button>
+            <Button 
+              type="button" 
+              onClick={() => form.handleSubmit(onSubmit)()}
+              disabled={form.formState.isSubmitting}
+            >
+              <Check className="mr-2 h-4 w-4" /> 
+              {memberData ? 'Update' : 'Save'}
+            </Button>
 
-            {memberData && <Button type="button" onClick={onDelete} variant="destructive"><Trash /> Delete</Button>}
+            {memberData && (
+              <Button 
+                type="button" 
+                onClick={() => setShowDeleteConfirm(true)}
+                variant="destructive"
+              >
+                <Trash className="mr-2 h-4 w-4" /> Delete
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -123,13 +144,14 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
                 <FormItem>
                   <FormLabel>
                     Entity Code
-                    {entitySchema.shape.code._def.checks.some((c) => c.kind === "min") && (
-                      <span className="text-destructive"> *</span>
-                    )}
+                    <span className="text-destructive"> *</span>
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter Entity Code" {...field} />
-
+                    <Input 
+                      placeholder="Enter Entity Code" 
+                      {...field} 
+                      disabled={form.formState.isSubmitting}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -143,12 +165,14 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
                 <FormItem>
                   <FormLabel>
                     Entity Name
-                    {entitySchema.shape.code._def.checks.some((c) => c.kind === "min") && (
-                      <span className="text-destructive"> *</span>
-                    )}
+                    <span className="text-destructive"> *</span>
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter Entity Name" {...field} />
+                    <Input 
+                      placeholder="Enter Entity Name" 
+                      {...field} 
+                      disabled={form.formState.isSubmitting}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -157,6 +181,34 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
           </form>
         </Form>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Are you absolutely sure?</DialogTitle>
+            <p className="mt-2">
+              This action cannot be undone. This will permanently delete the entity 
+              and all its associated data.
+            </p>
+          </DialogHeader>
+          <DialogFooter className="mt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowDeleteConfirm(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDelete}
+              disabled={form.formState.isSubmitting}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
