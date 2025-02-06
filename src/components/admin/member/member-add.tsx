@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -17,6 +17,8 @@ import { format } from "date-fns"
 import { CalendarIcon, Check, Trash, X } from "lucide-react";
 import AxiosInstance from "@/lib/axios";
 import { API_ENDPOINTS } from "@/config/api-endpoints";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const genderOptions = [
   { value: "Male", label: "Male" },
@@ -71,10 +73,7 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
   const dynamicSchema = configData
     ? configData.reduce((schema: any, item: any) => {
       if (item.dynamic_input.required) {
-        schema[item.dynamic_input.name] = z
-          .string()
-          .email("Invalid email address 2")
-          .nonempty(`${item.dynamic_input.label} is required.`).default("");
+        schema[item.dynamic_input.name] = z.string().email("Invalid email address 2").nonempty(`${item.dynamic_input.label} is required.`).default("");
       } else {
         schema[item.dynamic_input.name] = z.string().optional().default("");
       }
@@ -90,7 +89,17 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
     date_of_birth: z.string().nonempty("Date of birth is required."),
     phone: z.string().nonempty("Phone number is required.").min(10, "Phone number must be at least 10 digits."),
     gender: z.string().min(1, "Gender is required"),
+    tithe_pay: z.boolean().default(false),
+    tithe_pay_type: z.string().nullable().optional(),
     ...dynamicSchema,  // Merge dynamic schema
+  }).superRefine((data, ctx) => {
+    if (data.tithe_pay && !data.tithe_pay_type) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Tithe pay type is required when tithe pay is checked.",
+        path: ["tithe_pay_type"]
+      });
+    }
   });
 
   const defaultDynamicValues = configData?.reduce((acc: any, item: any) => {
@@ -108,10 +117,20 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
       date_of_birth: "",
       phone: "",
       gender: "",
+      tithe_pay: false,
+      tithe_pay_type: "",
       ...defaultDynamicValues,
     },
     // mode: "onChange", // Enable real-time validation
   });
+
+  const tithePay = form.watch("tithe_pay"); // Watch the checkbox value
+
+  useEffect(() => {
+    if (!tithePay) {
+      form.setValue("tithe_pay_type", ""); // Reset when unchecked
+    }
+  }, [tithePay, form]);
 
   // useEffect(() => {
   //   console.log("Errors:", form.formState.errors);
@@ -324,22 +343,9 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
                               {entity.code} - {entity.name}
                             </SelectItem>
                           ))}
-                          {/* <SelectItem value="m@example.com">
-                          m@example.com
-                        </SelectItem>
-                        <SelectItem value="m@google.com">
-                          m@google.com
-                        </SelectItem>
-                        <SelectItem value="m@support.com">
-                          m@support.com
-                        </SelectItem> */}
                         </SelectGroup>
                       </SelectContent>
                     </Select>
-                    {/* <FormDescription>
-                    You can manage email addresses in your
-                    <a href="/examples/forms">email settings</a>.
-                  </FormDescription> */}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -392,15 +398,15 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
               control={form.control}
               name="date_of_birth"
               render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Date of birth</FormLabel>
+                <FormItem>
+                  <FormLabel>Date of Birth</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
                           variant={"outline"}
                           className={cn(
-                            "pl-3 text-left font-normal",
+                            "pl-3 text-left font-normal w-full",
                             !field.value && "text-muted-foreground"
                           )}
                         >
@@ -469,6 +475,73 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
                 </FormItem>
               )}
             />
+
+            <div className="col-span-2 rounded border p-4">
+              <div className="grid grid-cols-2 gap-5 items-center">
+                <FormField
+                  control={form.control}
+                  name="tithe_pay"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 ">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>
+                          Tithe Pay
+                        </FormLabel>
+                        <FormDescription>
+                          You can manage your mobile notifications in.
+                        </FormDescription>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="tithe_pay_type"
+                  render={({ field }) => (
+                    <FormItem
+                      className={cn(
+                        "space-y-3",
+                        !tithePay && "opacity-50 pointer-events-none" // Disable interactions and gray out
+                      )}>
+                      <FormLabel>Tithe Pay Type</FormLabel>
+                      <FormControl>
+                        <RadioGroup
+                          onValueChange={field.onChange}
+                          value={field.value}
+                          disabled={!tithePay}
+                          className="flex flex-col space-y-1"
+                        >
+                          <FormItem className="flex items-center space-x-3 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="person" />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                              Person Pay
+                            </FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center space-x-3 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="group" />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                              Group Pay
+                            </FormLabel>
+                          </FormItem>
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
 
             {configData && configData.map((item: any) => {
               const { label, name, placeholder, required, type } = item.dynamic_input;

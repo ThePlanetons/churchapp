@@ -15,17 +15,15 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import DeleteConfirmationDialog from "../delete-confirmation";
-import { jsPDF } from 'jspdf';
-import "jspdf-autotable";
-// import autoTable from "jspdf-autotable";
-import autoTable from 'jspdf-autotable'
+import ExcelExportButton from "../shared/export-to-excel";
+import PDFExportButton from "../shared/export-to-pdf";
 
 // interface DataTableProps<TData, TValue> {
 //   columns: ColumnDef<TData, TValue>[]
 //   data: TData[]
 // }
 
-type Member = {
+interface Member {
   id: number;
   first_name: string;
   last_name: string;
@@ -50,57 +48,6 @@ const SortableHeader = ({ column, title }: { column: any; title: string }) => {
     </div>
   );
 };
-
-const ExportPDFButton = ({ table }: { table: any }) => {
-  const handleExportPDF = () => {
-    const doc = new jsPDF();
-    const columns = table.getHeaderGroups().map((headerGroup: any) =>
-      headerGroup.headers.map((header: any) => header.column.columnDef.header)
-    ).flat();
-
-    const rows = table.getRowModel().rows.map((row: any) =>
-      row.getVisibleCells().map((cell: any) =>
-        flexRender(cell.column.columnDef.cell, cell.getContext())
-      )
-    );
-
-    // Ensure that the table fits within the page
-    const options = {
-      head: [columns],
-      body: rows,
-      startY: 20,  // Adjust the starting Y position to avoid overlap
-      margin: { top: 10, left: 10, right: 10 },  // Adjust margins
-      pageBreak: "auto",  // This automatically breaks the table if it exceeds the page height
-      theme: "striped",   // Optional: adds striped style to the table
-    };
-
-    // Check if table height is greater than the page height and split the content
-    const tableHeight = (doc as any).autoTable.previous.finalY; // Get the height of the last table rendered
-    if (tableHeight > doc.internal.pageSize.height - 20) {
-      doc.addPage(); // Add a new page if the table exceeds the current page
-    }
-
-    // Generate and save the PDF
-    (doc as any).autoTable(options);
-
-    // (doc as any).autoTable({
-    //   head: [columns],
-    //   body: rows,
-    // });
-
-    // // autoTable(doc, {
-    // //   head: [columns],
-    // //   body: rows,
-    // // });
-
-    doc.save("table.pdf");
-  };
-
-  return (
-    <Button onClick={handleExportPDF}>Export as PDF</Button>
-  );
-};
-
 
 function MemberList({ onAddMember, onConfigureMember }: { onAddMember: (memberData: any) => void; onConfigureMember: () => void }) {
   const { toast } = useToast();
@@ -171,9 +118,9 @@ function MemberList({ onAddMember, onConfigureMember }: { onAddMember: (memberDa
 
   const columns: ColumnDef<Member>[] = [
     {
+      id: "actions",
       // accessorKey: "actions",
       // header: "Actions",
-      id: "actions",
       cell: ({ row }) => {
         return (
           <DropdownMenu>
@@ -251,59 +198,41 @@ function MemberList({ onAddMember, onConfigureMember }: { onAddMember: (memberDa
     getPaginationRowModel: getPaginationRowModel(),
   });
 
-  // Function to export the table to PDF
-  const exportToPDF = () => {
-    const doc = new jsPDF();
-
-    // Extract table rows (excluding the first column)
-    const rows = table.getRowModel().rows.map(row =>
-      row.getVisibleCells().slice(1).map(cell => cell.getValue())  // Removes first column data
-    );
-
-    const headers = [['ID', 'First Name', 'Last Name', 'Email', 'DOB', 'Phone', 'Gender']];
-
-    autoTable(
-      doc,
-      {
-        head: headers,
-        body: rows as any,
-        styles: { fontSize: 12, textColor: [0, 0, 0], minCellHeight: 14, valign: 'middle' },
-        headStyles: { fontStyle: "bold", fillColor: [0, 150, 136], textColor: 255 },
-        bodyStyles: { fillColor: [240, 240, 240] },
-        alternateRowStyles: { fillColor: [255, 255, 255] },
-        margin: { top: 10, left: 10, right: 10, bottom: 10 },
-      },
-      // {
-      //   html: '#table-to-pdf',
-      //   useCss: true,
-      //   showHead: "everyPage",
-      //   pageBreak: "auto"
-      //   // body: [
-      //   //   [{ content: 'Text', colSpan: 2, rowSpan: 2, styles: { halign: 'center' } }],
-      //   // ],
-      // },
-    );
-
-    doc.save('table.pdf');
-
-    // const doc = new jsPDF();
-    // const tableElement = document.getElementById("table-to-pdf");
-
-    // if (tableElement) {
-    //   (doc as any).autoTable({ html: tableElement });
-    //   doc.save("table.pdf");
-    // }
-  };
-
   return (
     <div>
       <div className="flex flex-row items-center justify-between px-4 py-3 border-b">
         <div className="text-2xl font-semibold">Member List</div>
 
-        <div className="flex flex-row gap-3">
-          <Button onClick={exportToPDF} className="mb-4">
-            Export to PDF
-          </Button>
+        <div className="flex flex-row items-center gap-3">
+          <ExcelExportButton
+            data={table.getRowModel().rows.map((row) => row.original)}
+            fileName='Members.xlsx'
+            excludeColumns={['actions', 'dynamic_fields', 'entity']}  // Columns to exclude
+            columnMappings={{
+              id: 'Member ID',
+              first_name: 'First Name',
+              last_name: 'Last Name',
+              email: 'Email Address',
+              date_of_birth: 'Date of Birth',
+              phone: 'Phone Number',
+              gender: 'Gender',
+            }}
+          />
+
+          <PDFExportButton
+            data={table.getRowModel().rows.map((row) => row.original)}
+            fileName='Members.pdf'
+            excludeColumns={['actions', 'dynamic_fields', 'entity', 'created_by', 'created_at', 'updated_by', 'updated_at']} // Columns to exclude
+            columnMappings={{
+              id: 'Member ID',
+              first_name: 'First Name',
+              last_name: 'Last Name',
+              email: 'Email Address',
+              date_of_birth: 'Date of Birth',
+              phone: 'Phone Number',
+              gender: 'Gender',
+            }}  // Custom column names
+          />
 
           <Button onClick={onConfigureMember}><Bolt className="w-8 h-8" /> Configure</Button>
 
