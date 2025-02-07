@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Home, Inbox, Search, Settings, User, Users } from "lucide-react"
+import { Home, Inbox, Search, Settings, User, Users, HandCoins,BookUser } from "lucide-react"
 
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem
@@ -25,7 +25,12 @@ const items = [
   {
     title: "Entity",
     url: "/admin/entity",
-    icon: Search,
+    icon: BookUser,
+  },
+  {
+    title: "Collation",
+    url: "/admin/collation",
+    icon: HandCoins,
   },
   {
     title: "Settings",

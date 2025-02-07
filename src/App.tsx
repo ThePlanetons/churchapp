@@ -11,6 +11,7 @@ import AdminLayout from './layout/AdminLayout';
 import AdminDashboard from './components/admin/dashboard/dashboard';
 import MemberManagement from './components/admin/member/member';
 import Entity from './components/admin/entity/entity';
+import Collation from './components/admin/collation/collation';
 import Settings from './components/admin/settings';
 import UserManagement from './components/admin/user/user';
 
@@ -37,6 +38,7 @@ function App() {
           <Route path="/admin/members" element={<MemberManagement />} />
           <Route path="/admin/settings" element={<Settings />} />
           <Route path="/admin/entity" element={<Entity />} />
+          <Route path="/admin/collation" element={<Collation />} />
         </Route>
       </Routes>
     </BrowserRouter>
