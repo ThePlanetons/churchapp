@@ -1,42 +1,62 @@
-import React from "react";
-import { useEffect, useMemo, useState } from "react";
-import { ArrowDown, ArrowUp, Bolt, MoreHorizontal, Pencil } from "lucide-react";
+import React, { useState, useEffect, useMemo } from "react";
+import { ArrowDown, ArrowUp, MoreHorizontal, Pencil } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import AxiosInstance from "@/lib/axios";
 import {
-  ColumnDef, flexRender, getCoreRowModel, getPaginationRowModel, getSortedRowModel, SortingState,
-  useReactTable
-} from "@tanstack/react-table"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  SortingState,
+  useReactTable,
+} from "@tanstack/react-table";
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator,
-  DropdownMenuTrigger
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import DeleteConfirmationDialog from "../delete-confirmation";
 import ExcelExportButton from "../shared/export-to-excel";
 import PDFExportButton from "../shared/export-to-pdf";
 
-// interface DataTableProps<TData, TValue> {
-//   columns: ColumnDef<TData, TValue>[]
-//   data: TData[]
-// }
-
-interface Member {
+// Define the Collection interface (adjust types as needed)
+interface Collection {
   id: number;
-  first_name: string;
-  last_name: string;
-  email: string;
-  date_of_birth: string;
-  phone: string;
-  gender: string;
-  dynamic_fields: Record<string, any>;
+  collection_type: string;
+  collection_amount: string;
+  transaction_id: string;
+  transaction_date: string;
+  transaction_type: string;
+  created_at: string;
+  created_by: string;
+  updated_at: string;
+  updated_by: string;
+  member: number;
 }
 
-const SortableHeader = ({ column, title }: { column: any; title: string }) => {
+// Reusable sortable header component
+const SortableHeader = ({
+  column,
+  title,
+}: {
+  column: any;
+  title: string;
+}) => {
   const isSorted = column.getIsSorted();
-
   return (
     <div
       className="flex flex-row items-center cursor-pointer h-full"
@@ -49,147 +69,86 @@ const SortableHeader = ({ column, title }: { column: any; title: string }) => {
   );
 };
 
-function CollationList({ onAddMember, onConfigureMember }: { onAddMember: (memberData: any) => void; onConfigureMember: () => void }) {
-  const { toast } = useToast();
-  const [sorting, setSorting] = React.useState<SortingState>([{ id: "id", desc: false }])
+// Component props using the names expected by your usage file
+interface CollationListProps {
+  onAddMember: (collectionData: Collection | null) => void;
+  onConfigureMember?: () => void;
+}
 
-  const [members, setMembers] = useState<Member[]>([]);
+function CollationList({
+  onAddMember,
+  onConfigureMember,
+}: CollationListProps) {
+  const { toast } = useToast();
+  const [sorting, setSorting] = useState<SortingState>([{ id: "id", desc: false }]);
+  const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Memoize the axiosInstance to prevent re-creation on every render
+  // Memoize axiosInstance so that it isn't recreated on every render.
   const axiosInstance = useMemo(() => AxiosInstance(toast), [toast]);
 
+  // Fetch collections data from the API
   useEffect(() => {
     axiosInstance
-      .get("members/")
+      .get("collections/") // Replace with "http://127.0.0.1:8000/api/collections/" if not already set in Axios defaults
       .then((response) => {
-        setMembers(response.data || []);
+        setCollections(response.data || []);
       })
       .catch((error) => {
-        // console.error("API Error:", error);
+        // Optionally, handle error here
       })
       .finally(() => setLoading(false));
   }, [axiosInstance]);
 
-  // useEffect(() => {
-  //   axios
-  //     .get(`${import.meta.env.VITE_API_URL}members/`)
-  //     .then((response) => {
-  //       setMembers(response.data || []);
-  //     })
-  //     .catch((error) => {
-  //       let errorMessage = "Something went wrong. Please try again.";
-
-  //       if (error.response) {
-  //         // Server responded with a status code (like 404, 500)
-  //         errorMessage = `Error ${error.response.status}: ${error.response.statusText}`;
-  //       } else if (error.request) {
-  //         // No response received from server (network issue)
-  //         errorMessage = "Server is not responding. Check your network or API status.";
-  //       } else {
-  //         // Other unexpected errors
-  //         errorMessage = error.message || "Unknown error occurred.";
-  //       }
-
-  //       toast({
-  //         variant: "destructive",
-  //         title: "Uh oh! Something went wrong.",
-  //         description: errorMessage,
-  //       });
-  //     })
-  //     .finally(() => setLoading(false));
-  // }, []);
-
+  // For delete functionality
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedMember, setSelectedMember] = useState<any>(null);
+  const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
 
-  const toggleDeleteDialog = (member: any = null) => {
-    setSelectedMember(member);
-    setDeleteDialogOpen((prev) => !prev);  // Toggle dialog visibility
+  const toggleDeleteDialog = (collection: Collection | null = null) => {
+    setSelectedCollection(collection);
+    setDeleteDialogOpen((prev) => !prev);
   };
 
   const handleDelete = () => {
-    if (selectedMember) {
-      // axiosInstance.delete(`members/${selectedMember.id}`)
-      console.log("Deleting member", selectedMember);
+    if (selectedCollection) {
+      // Uncomment below to actually delete the collection
+      // axiosInstance.delete(`collections/${selectedCollection.id}`)
+      console.log("Deleting collection", selectedCollection);
     }
     toggleDeleteDialog();
   };
 
-  const columns: ColumnDef<Member>[] = [
+  // Define columns to show only the required fields
+  const columns: ColumnDef<Collection>[] = [
     {
-      id: "actions",
-      // accessorKey: "actions",
-      // header: "Actions",
-      cell: ({ row }) => {
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              {/* <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(String(member.id))}
-              >
-                Copy member ID
-              </DropdownMenuItem> */}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => handleItemClick(row.original)}>Edit</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => toggleDeleteDialog(row.original)}>Delete</DropdownMenuItem>
-            </DropdownMenuContent>
-
-            <DeleteConfirmationDialog
-              isOpen={isDeleteDialogOpen}
-              onClose={() => toggleDeleteDialog()}
-              onConfirm={handleDelete}
-              title="Are you absolutely sure?"
-              description="This action cannot be undone. Are you sure you want to permanently delete this member from our servers?"
-            />
-          </DropdownMenu>
-        )
-      },
+      accessorKey: "member",
+      header: ({ column }) => <SortableHeader column={column} title="Member" />,
     },
     {
-      accessorKey: "id",
-      header: ({ column }) => <SortableHeader column={column} title="ID" />,
+      accessorKey: "collection_amount",
+      header: ({ column }) => <SortableHeader column={column} title="Amount" />,
     },
     {
-      accessorKey: "first_name",
-      header: ({ column }) => <SortableHeader column={column} title="First Name" />,
+      accessorKey: "transaction_type",
+      header: ({ column }) => <SortableHeader column={column} title="Transaction Type" />,
     },
     {
-      accessorKey: "last_name",
-      header: ({ column }) => <SortableHeader column={column} title="Last Name" />,
+      accessorKey: "collection_type",
+      header: ({ column }) => <SortableHeader column={column} title="Collection Type" />,
     },
     {
-      accessorKey: "email",
-      header: ({ column }) => <SortableHeader column={column} title="Email" />,
-    },
-    {
-      accessorKey: "date_of_birth",
-      header: ({ column }) => <SortableHeader column={column} title="DOB" />,
-    },
-    {
-      accessorKey: "phone",
-      header: ({ column }) => <SortableHeader column={column} title="Phone" />,
-    },
-    {
-      accessorKey: "gender",
-      header: ({ column }) => <SortableHeader column={column} title="Gender" />,
+      accessorKey: "created_by",
+      header: ({ column }) => <SortableHeader column={column} title="Created By" />,
     },
   ];
 
-  const handleItemClick = (member: Member) => {
-    // Send selected member data to AddMember
-    onAddMember(member);
+  // When editing a collection, pass its data to the parent using onAddMember.
+  const handleEdit = (collection: Collection) => {
+    onAddMember(collection);
   };
 
   const table = useReactTable({
-    data: members,
+    data: collections,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -200,83 +159,76 @@ function CollationList({ onAddMember, onConfigureMember }: { onAddMember: (membe
 
   return (
     <div>
+      {/* Header */}
       <div className="flex flex-row items-center justify-between px-4 py-3 border-b">
-        <div className="text-2xl font-semibold">Member List</div>
-
+        <div className="text-2xl font-semibold">Collection List</div>
         <div className="flex flex-row items-center gap-3">
           <ExcelExportButton
             data={table.getRowModel().rows.map((row) => row.original)}
-            fileName='Members.xlsx'
-            excludeColumns={['actions', 'dynamic_fields', 'entity']}  // Columns to exclude
+            fileName="Collections.xlsx"
+            excludeColumns={[
+              "actions",
+              "transaction_id",
+              "transaction_date",
+              "created_at",
+              "updated_at",
+              "updated_by",
+            ]}
             columnMappings={{
-              id: 'Member ID',
-              first_name: 'First Name',
-              last_name: 'Last Name',
-              email: 'Email Address',
-              date_of_birth: 'Date of Birth',
-              phone: 'Phone Number',
-              gender: 'Gender',
+              member: "Member",
+              collection_amount: "Amount",
+              transaction_type: "Transaction Type",
+              collection_type: "Collection Type",
+              created_by: "Created By",
             }}
           />
-
           <PDFExportButton
             data={table.getRowModel().rows.map((row) => row.original)}
-            fileName='Members.pdf'
-            excludeColumns={['actions', 'dynamic_fields', 'entity', 'created_by', 'created_at', 'updated_by', 'updated_at']} // Columns to exclude
+            fileName="Collections.pdf"
+            excludeColumns={[
+              "actions",
+              "transaction_id",
+              "transaction_date",
+              "created_at",
+              "updated_at",
+              "updated_by",
+            ]}
             columnMappings={{
-              id: 'Member ID',
-              first_name: 'First Name',
-              last_name: 'Last Name',
-              email: 'Email Address',
-              date_of_birth: 'Date of Birth',
-              phone: 'Phone Number',
-              gender: 'Gender',
-            }}  // Custom column names
+              member: "Member",
+              collection_amount: "Amount",
+              transaction_type: "Transaction Type",
+              collection_type: "Collection Type",
+              created_by: "Created By",
+            }}
           />
-
-
-          <Button onClick={() => onAddMember(null)}><Pencil /> Add Collation</Button>
+          <Button onClick={() => onAddMember(null)}>
+            <Pencil /> Add Collection
+          </Button>
         </div>
       </div>
 
+      {/* Table */}
       <Table id="table-to-pdf">
-        <TableHeader
-          className="bg-lime-400"
-        >
+        <TableHeader className="bg-lime-400">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}
-                  className="h-14 text-black tracking-wide"
-                >
+                <TableHead key={header.id} className="h-14 text-black tracking-wide">
                   {header.isPlaceholder
                     ? null
-                    : flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
+                    : flexRender(header.column.columnDef.header, header.getContext())}
                 </TableHead>
               ))}
             </TableRow>
           ))}
         </TableHeader>
-
         <TableBody>
           {table.getRowModel().rows.length ? (
             table.getRowModel().rows.map((row) => (
-              // onClick={() => onAddMember(row.original)}
-              <TableRow
-                key={row.id}
-                className="cursor-pointer h-14 hover:bg-gray-200"
-              >
+              <TableRow key={row.id} className="cursor-pointer h-14 hover:bg-gray-200">
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}
-                    className="font-medium"
-                  >
-                    {flexRender(
-                      cell.column.columnDef.cell,
-                      cell.getContext()
-                    )}
+                  <TableCell key={cell.id} className="font-medium">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
               </TableRow>
@@ -284,13 +236,14 @@ function CollationList({ onAddMember, onConfigureMember }: { onAddMember: (membe
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                No members found.
+                No collections found.
               </TableCell>
             </TableRow>
           )}
         </TableBody>
       </Table>
 
+      {/* Pagination */}
       <div className="flex items-center justify-end space-x-2 px-2 h-14 bg-lime-400 rounded-b-xl">
         <Button
           variant="outline"
@@ -309,7 +262,7 @@ function CollationList({ onAddMember, onConfigureMember }: { onAddMember: (membe
           Next
         </Button>
       </div>
-    </div >
+    </div>
   );
 }
 
