@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -10,6 +10,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import AxiosInstance from "@/lib/axios";
 
 interface Member {
@@ -23,6 +32,15 @@ interface Member {
 interface Entity {
   id: number;
   name: string;
+}
+
+interface FormValues {
+  member: string;
+  associatedEntity: string;
+  date: string;
+  amount: string;
+  collectFirstApprover: string;
+  collectSecondApprover: string;
 }
 
 interface AddCollationProps {
@@ -40,16 +58,19 @@ export function AddCollation({
   const [members, setMembers] = useState<Member[]>([]);
   const [entities, setEntities] = useState<Entity[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
-  const [selectedEntity, setSelectedEntity] = useState("");
-  const [amount, setAmount] = useState("");
-  const [date, setDate] = useState("");
 
-  // New state variables for approver fields (store selected member IDs)
-  const [collectFirstApprover, setCollectFirstApprover] = useState<number | null>(null);
-  const [collectSecondApprover, setCollectSecondApprover] = useState<number | null>(null);
+  const form = useForm<FormValues>({
+    defaultValues: {
+      member: "",
+      associatedEntity: "",
+      date: "",
+      amount: "",
+      collectFirstApprover: "",
+      collectSecondApprover: "",
+    },
+  });
 
-  // New state to manage the active tab
+  // Manage the selected tab separately
   const [selectedTab, setSelectedTab] = useState("Tithes");
 
   const axiosInstance = AxiosInstance(toast);
@@ -88,21 +109,10 @@ export function AddCollation({
     };
 
     fetchData();
-  }, []);
+  }, [axiosInstance, toast]);
 
-  const handleMemberSelect = (value: string) => {
-    const memberId = Number(value);
-    setSelectedMemberId(memberId);
-
-    const member = members.find((m) => m.id === memberId);
-    if (member) {
-      const entityName = getEntityName(member.entity);
-      setSelectedEntity(entityName);
-    }
-  };
-
-  const handleSubmit = () => {
-    if (!selectedMemberId || !date || !amount) {
+  const onSubmit: SubmitHandler<FormValues> = (data) => {
+    if (!data.member || !data.date || !data.amount) {
       toast({
         variant: "destructive",
         title: "Missing Information",
@@ -112,39 +122,44 @@ export function AddCollation({
     }
 
     const formData = {
-      memberId: selectedMemberId,
-      entity: selectedEntity,
+      memberId: Number(data.member),
+      entity: data.associatedEntity,
       type: selectedTab,
-      date,
-      amount: parseFloat(amount),
-      collect_first_approver: collectFirstApprover,
-      collect_second_approve: collectSecondApprover,
+      date: data.date,
+      amount: parseFloat(data.amount),
+      collect_first_approver: data.collectFirstApprover
+        ? Number(data.collectFirstApprover)
+        : null,
+      collect_second_approve: data.collectSecondApprover
+        ? Number(data.collectSecondApprover)
+        : null,
     };
 
     console.log("Submitting collation:", formData);
     onClose();
   };
 
-  // Use the provided totalAmount or default to 0
   const displayTotalAmount = totalAmount ?? 0;
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col justify-between px-4 py-3 border-b">
-        <div className="flex justify-between items-center w-full">
-          <div className="text-2xl font-bold">
-            {memberData ? "Edit Collation" : `New ${selectedTab} Entry`}
-          </div>
-          <div className="flex gap-4 items-center">
-          <div className="text-lg font-semibold">
+      <div className="px-4 py-3 border-b">
+        {/* Title */}
+
+        {/* Action Row: Cancel on left; Total Amount & Submit on right */}
+        <div className="flex justify-between items-center">
+        <div className="text-2xl font-bold text-center ">
+          {memberData ? "Edit Collation" : `New ${selectedTab} Entry`}
+        </div>
+          <div className="flex items-center gap-3">
+            <div className="text-lg font-semibold">
               Total Amount: ${displayTotalAmount.toFixed(2)}
             </div>
             <Button variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-
-            <Button onClick={handleSubmit}>
+            Cancel
+          </Button>
+            <Button onClick={form.handleSubmit(onSubmit)}>
               {memberData ? "Save Changes" : "Create Collation"}
             </Button>
           </div>
@@ -153,147 +168,209 @@ export function AddCollation({
 
       {/* Tabs */}
       <div className="px-6">
-        <div className="flex space-x-4 border-b mb-4">
-          {["Tithes", "Mission", "Partnership", "Offering"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setSelectedTab(tab)}
-              className={`py-2 px-4 -mb-px border-b-2 font-medium ${
-                selectedTab === tab
-                  ? "border-primary text-primary"
-                  : "border-transparent text-gray-700"
-              }`}
+        <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+          <TabsList>
+            <TabsTrigger
+              value="Tithes"
+              className="data-[state=active]:bg-blue-500 data-[state=active]:text-white"
             >
-              {tab}
-            </button>
-          ))}
-        </div>
+              Tithes
+            </TabsTrigger>
+            <TabsTrigger
+              value="Mission"
+              className="data-[state=active]:bg-blue-500 data-[state=active]:text-white"
+            >
+              Mission
+            </TabsTrigger>
+            <TabsTrigger
+              value="Partnership"
+              className="data-[state=active]:bg-blue-500 data-[state=active]:text-white"
+            >
+              Partnership
+            </TabsTrigger>
+            <TabsTrigger
+              value="Offering"
+              className="data-[state=active]:bg-blue-500 data-[state=active]:text-white"
+            >
+              Offering
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
-      {/* Form Fields */}
-      <div className="space-y-6 px-6">
-        {/* Member Name and Associated Entity in one row */}
-        <div className="flex flex-col sm:flex-row sm:space-x-4">
-          <div className="flex-1 space-y-2">
-            <Label htmlFor="member">Member Name</Label>
-            <Select
-              onValueChange={handleMemberSelect}
-              disabled={loading}
-              value={selectedMemberId?.toString() || ""}
-            >
-              <SelectTrigger>
-                <SelectValue
-                  placeholder={loading ? "Loading members..." : "Select a member"}
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {members.map((member) => (
-                  <SelectItem key={member.id} value={member.id.toString()}>
-                    {getUsername(member)} ({member.first_name} {member.last_name})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex-1 space-y-2">
-            <Label>Associated Entity</Label>
-            <Input
-              value={selectedEntity}
-              readOnly
-              className="bg-muted cursor-not-allowed"
-            />
-          </div>
-        </div>
-
-        {/* Container for Date and Amount on the same line (without border) */}
-        <div className="p-4">
-          <div className="flex flex-col sm:flex-row sm:space-x-4">
-            <div className="flex-1 space-y-2">
-              <Label htmlFor="date">Date</Label>
-              <Input
-                id="date"
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
+      {/* Form */}
+      <div className="px-6 space-y-6">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Member & Associated Entity */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="member"
+                rules={{ required: "Member is required" }}
+                render={({ field, fieldState: { error } }) => (
+                  <FormItem>
+                    <FormLabel>Member Name</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={(value: string) => {
+                          field.onChange(value);
+                          const memberId = Number(value);
+                          const member = members.find((m) => m.id === memberId);
+                          if (member) {
+                            const entityName = getEntityName(member.entity);
+                            form.setValue("associatedEntity", entityName);
+                          }
+                        }}
+                        value={field.value}
+                        disabled={loading}
+                      >
+                        <SelectTrigger>
+                          <SelectValue
+                            placeholder={
+                              loading ? "Loading members..." : "Select a member"
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {members.map((member) => (
+                            <SelectItem
+                              key={member.id}
+                              value={member.id.toString()}
+                            >
+                              {getUsername(member)} (
+                              {member.first_name} {member.last_name})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    {error && <FormMessage>{error.message}</FormMessage>}
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="associatedEntity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Associated Entity</FormLabel>
+                    <FormControl>
+                      <Input
+                        value={field.value}
+                        readOnly
+                        className="bg-muted cursor-not-allowed"
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
               />
             </div>
-            <div className="flex-1 space-y-2">
-              <Label htmlFor="amount">Amount</Label>
-              <Input
-                id="amount"
-                type="number"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0.00"
-                step="0.01"
+
+            {/* Date & Amount */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="date"
+                rules={{ required: "Date is required" }}
+                render={({ field, fieldState: { error } }) => (
+                  <FormItem>
+                    <FormLabel>Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    {error && <FormMessage>{error.message}</FormMessage>}
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="amount"
+                rules={{ required: "Amount is required" }}
+                render={({ field, fieldState: { error } }) => (
+                  <FormItem>
+                    <FormLabel>Amount</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="0.00"
+                        step="0.01"
+                        {...field}
+                      />
+                    </FormControl>
+                    {error && <FormMessage>{error.message}</FormMessage>}
+                  </FormItem>
+                )}
               />
             </div>
-          </div>
-        </div>
 
-        {/* Box for Collect First Approver and Collect Second Approve using dropdowns */}
-        <div className="p-4 rounded-md">
-          <div className="flex flex-col sm:flex-row sm:space-x-4">
-            {/* Collect First Approver Dropdown */}
-            <div className="flex-1 space-y-2">
-              <Label htmlFor="collect_first_approver">
-                Collect First Approver
-              </Label>
-              <Select
-                onValueChange={(value: string) =>
-                  setCollectFirstApprover(Number(value))
-                }
-                value={
-                  collectFirstApprover ? collectFirstApprover.toString() : ""
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select first approver" />
-                </SelectTrigger>
-                <SelectContent>
-                  {members.map((member) => (
-                    <SelectItem
-                      key={member.id}
-                      value={member.id.toString()}
-                    >
-                      {getUsername(member)} ({member.first_name} {member.last_name})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Approvers (no border) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="collectFirstApprover"
+                render={({ field, fieldState: { error } }) => (
+                  <FormItem>
+                    <FormLabel>Collect First Approver</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={(value: string) => field.onChange(value)}
+                        value={field.value}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select first approver" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {members.map((member) => (
+                            <SelectItem
+                              key={member.id}
+                              value={member.id.toString()}
+                            >
+                              {getUsername(member)} (
+                              {member.first_name} {member.last_name})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    {error && <FormMessage>{error.message}</FormMessage>}
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="collectSecondApprover"
+                render={({ field, fieldState: { error } }) => (
+                  <FormItem>
+                    <FormLabel>Collect Second Approve</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={(value: string) => field.onChange(value)}
+                        value={field.value}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select second approver" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {members.map((member) => (
+                            <SelectItem
+                              key={member.id}
+                              value={member.id.toString()}
+                            >
+                              {getUsername(member)} (
+                              {member.first_name} {member.last_name})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    {error && <FormMessage>{error.message}</FormMessage>}
+                  </FormItem>
+                )}
+              />
             </div>
-
-            {/* Collect Second Approve Dropdown */}
-            <div className="flex-1 space-y-2">
-              <Label htmlFor="collect_second_approve">
-                Collect Second Approve
-              </Label>
-              <Select
-                onValueChange={(value: string) =>
-                  setCollectSecondApprover(Number(value))
-                }
-                value={
-                  collectSecondApprover ? collectSecondApprover.toString() : ""
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select second approver" />
-                </SelectTrigger>
-                <SelectContent>
-                  {members.map((member) => (
-                    <SelectItem
-                      key={member.id}
-                      value={member.id.toString()}
-                    >
-                      {getUsername(member)} ({member.first_name} {member.last_name})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
+          </form>
+        </Form>
       </div>
     </div>
   );
