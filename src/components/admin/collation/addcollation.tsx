@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -73,7 +73,8 @@ export function AddCollation({
   // Manage the selected tab separately
   const [selectedTab, setSelectedTab] = useState("Tithes");
 
-  const axiosInstance = AxiosInstance(toast);
+  // Memoize your axios instance to include toast for error handling if needed
+  const axiosInstance = useMemo(() => AxiosInstance(toast), [toast]);
 
   const getUsername = (member: Member) => {
     const usernameKey = Object.keys(member.dynamic_fields).find((key) =>
@@ -111,32 +112,58 @@ export function AddCollation({
     fetchData();
   }, [axiosInstance, toast]);
 
-  const onSubmit: SubmitHandler<FormValues> = (data) => {
+  const onSubmit: SubmitHandler<FormValues> = async (data) => {
     if (!data.member || !data.date || !data.amount) {
       toast({
         variant: "destructive",
         title: "Missing Information",
-        description: "Please select a member and enter a date and amount",
+        description:
+          "Please select a member and enter a date and amount",
       });
       return;
     }
 
-    const formData = {
-      memberId: Number(data.member),
-      entity: data.associatedEntity,
-      type: selectedTab,
-      date: data.date,
-      amount: parseFloat(data.amount),
-      collect_first_approver: data.collectFirstApprover
-        ? Number(data.collectFirstApprover)
-        : null,
-      collect_second_approve: data.collectSecondApprover
-        ? Number(data.collectSecondApprover)
-        : null,
+    // Build the request body using the required parameter names
+    const requestBody = {
+      collection_type: selectedTab.toLowerCase(),  // e.g., "Tithes", "Mission", etc.
+      collection_amount: parseFloat(data.amount),
+      transaction_date: data.date,
+      transaction_type: "cash",
+      created_by: localStorage.getItem("name"), 
+      member: Number(data.member),
     };
 
-    console.log("Submitting collation:", formData);
-    onClose();
+    // Config object for the POST request
+    const config = {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        "Content-Type": "application/json",
+      },
+    };
+
+    try {
+      // Send the POST request to the collections endpoint
+      const response = await axiosInstance.post(
+        "http://127.0.0.1:8000/api/collections/",
+        requestBody,
+        config
+      );
+      console.log("Collection created:", response.data);
+      toast({
+        //variant: "success",
+        title: "Collection Created",
+        description: "The collection has been successfully created.",
+      });
+      onClose();
+    } catch (error) {
+      console.error("Error creating collection:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description:
+          "There was an error creating the collection. Please try again.",
+      });
+    }
   };
 
   const displayTotalAmount = totalAmount ?? 0;
@@ -145,20 +172,17 @@ export function AddCollation({
     <div className="space-y-6">
       {/* Header */}
       <div className="px-4 py-3 border-b">
-        {/* Title */}
-
-        {/* Action Row: Cancel on left; Total Amount & Submit on right */}
         <div className="flex justify-between items-center">
-        <div className="text-2xl font-bold text-center ">
-          {memberData ? "Edit Collation" : `New ${selectedTab} Entry`}
-        </div>
+          <div className="text-2xl font-bold text-center">
+            {memberData ? "Edit Collation" : `New ${selectedTab} Entry`}
+          </div>
           <div className="flex items-center gap-3">
             <div className="text-lg font-semibold">
               Total Amount: ${displayTotalAmount.toFixed(2)}
             </div>
             <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
+              Cancel
+            </Button>
             <Button onClick={form.handleSubmit(onSubmit)}>
               {memberData ? "Save Changes" : "Create Collation"}
             </Button>
@@ -216,7 +240,9 @@ export function AddCollation({
                         onValueChange={(value: string) => {
                           field.onChange(value);
                           const memberId = Number(value);
-                          const member = members.find((m) => m.id === memberId);
+                          const member = members.find(
+                            (m) => m.id === memberId
+                          );
                           if (member) {
                             const entityName = getEntityName(member.entity);
                             form.setValue("associatedEntity", entityName);
@@ -228,7 +254,9 @@ export function AddCollation({
                         <SelectTrigger>
                           <SelectValue
                             placeholder={
-                              loading ? "Loading members..." : "Select a member"
+                              loading
+                                ? "Loading members..."
+                                : "Select a member"
                             }
                           />
                         </SelectTrigger>
@@ -304,7 +332,7 @@ export function AddCollation({
               />
             </div>
 
-            {/* Approvers (no border) */}
+            {/* Approvers */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <FormField
                 control={form.control}

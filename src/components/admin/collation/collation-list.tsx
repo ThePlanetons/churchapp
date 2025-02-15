@@ -45,7 +45,15 @@ interface Collection {
   created_by: string;
   updated_at: string;
   updated_by: string;
-  member: number;
+  member: number; // This is the member ID
+}
+
+// Define the Member interface used for fetching member details
+interface Member {
+  id: number;
+  first_name: string;
+  last_name: string;
+  dynamic_fields: Record<string, any>;
 }
 
 // Reusable sortable header component
@@ -75,14 +83,12 @@ interface CollationListProps {
   onConfigureMember?: () => void;
 }
 
-function CollationList({
-  onAddMember,
-  onConfigureMember,
-}: CollationListProps) {
+function CollationList({ onAddMember, onConfigureMember }: CollationListProps) {
   const { toast } = useToast();
   const [sorting, setSorting] = useState<SortingState>([{ id: "id", desc: false }]);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [members, setMembers] = useState<Member[]>([]);
 
   // Memoize axiosInstance so that it isn't recreated on every render.
   const axiosInstance = useMemo(() => AxiosInstance(toast), [toast]);
@@ -90,15 +96,35 @@ function CollationList({
   // Fetch collections data from the API
   useEffect(() => {
     axiosInstance
-      .get("collections/") // Replace with "http://127.0.0.1:8000/api/collections/" if not already set in Axios defaults
+      .get("collections/") // Replace with "http://127.0.0.1:8000/api/collections/" if needed
       .then((response) => {
         setCollections(response.data || []);
       })
       .catch((error) => {
-        // Optionally, handle error here
+        toast({
+          variant: "destructive",
+          title: "Error loading collections",
+          description: "Failed to fetch collections data.",
+        });
       })
       .finally(() => setLoading(false));
-  }, [axiosInstance]);
+  }, [axiosInstance, toast]);
+
+  // Fetch members data so we can show member names instead of IDs
+  useEffect(() => {
+    axiosInstance
+      .get("members/")
+      .then((response) => {
+        setMembers(response.data || []);
+      })
+      .catch((error) => {
+        toast({
+          variant: "destructive",
+          title: "Error loading members",
+          description: "Failed to fetch members data.",
+        });
+      });
+  }, [axiosInstance, toast]);
 
   // For delete functionality
   const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -118,11 +144,17 @@ function CollationList({
     toggleDeleteDialog();
   };
 
-  // Define columns to show only the required fields
+  // Define columns to show only the required fields.
+  // For the member column, we override the cell to show the member's full name.
   const columns: ColumnDef<Collection>[] = [
     {
       accessorKey: "member",
       header: ({ column }) => <SortableHeader column={column} title="Member" />,
+      cell: ({ getValue }) => {
+        const memberId = getValue() as number;
+        const member = members.find((m) => m.id === memberId);
+        return member ? `${member.first_name} ${member.last_name}` : memberId;
+      },
     },
     {
       accessorKey: "collection_amount",
@@ -213,7 +245,10 @@ function CollationList({
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <TableHead key={header.id} className="h-14 text-black tracking-wide">
+                <TableHead
+                  key={header.id}
+                  className="h-14 text-black tracking-wide"
+                >
                   {header.isPlaceholder
                     ? null
                     : flexRender(header.column.columnDef.header, header.getContext())}
@@ -225,7 +260,10 @@ function CollationList({
         <TableBody>
           {table.getRowModel().rows.length ? (
             table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id} className="cursor-pointer h-14 hover:bg-gray-200">
+              <TableRow
+                key={row.id}
+                className="cursor-pointer h-14 hover:bg-gray-200"
+              >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id} className="font-medium">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -262,6 +300,13 @@ function CollationList({
           Next
         </Button>
       </div>
+
+      {/* Delete Confirmation Dialog (if needed) */}
+      {/* <DeleteConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={toggleDeleteDialog}
+        onConfirm={handleDelete}
+      /> */}
     </div>
   );
 }
