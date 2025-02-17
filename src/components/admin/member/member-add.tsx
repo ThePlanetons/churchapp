@@ -19,6 +19,9 @@ import AxiosInstance from "@/lib/axios";
 import { API_ENDPOINTS } from "@/config/api-endpoints";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { PhoneInput } from "@/components/ui/phone-input";
+import { CountryDropdown } from "@/components/ui/country-dropdown";
+import { Textarea } from "@/components/ui/textarea";
 
 const genderOptions = [
   { value: "Male", label: "Male" },
@@ -83,12 +86,17 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
 
   const memberSchema = z.object({
     entity: z.coerce.number({ invalid_type_error: "Entity is required." }).min(1, "Entity is required."),  // Ensure value is greater than 0
-    first_name: z.string().nonempty("First name is required.").min(2, "First name must be at least 2 characters."),
-    last_name: z.string().nonempty("Last name is required.").min(2, "Last name must be at least 2 characters."),
+    first_name: z.string().nonempty("First Name is required.").min(2, "First Name must be at least 2 characters."),
+    last_name: z.string().nonempty("Last Name is required.").min(2, "Last Name must be at least 2 characters."),
     email: z.string().email("Invalid email address"),
     date_of_birth: z.string().nonempty("Date of birth is required."),
     phone: z.string().nonempty("Phone number is required.").min(10, "Phone number must be at least 10 digits."),
     gender: z.string().min(1, "Gender is required"),
+    address: z.string().nonempty("Address is required."),
+    city: z.string().nonempty("City is required."),
+    state: z.string().nonempty("State is required."),
+    zip_code: z.string().nonempty("ZIP Code is required."),
+    country: z.string().nonempty("Country is required."),
     tithe_pay: z.boolean().default(false),
     tithe_pay_type: z.string().nullable().optional(),
     ...dynamicSchema,  // Merge dynamic schema
@@ -117,6 +125,11 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
       date_of_birth: "",
       phone: "",
       gender: "",
+      address: "",
+      city: "",
+      state: "",
+      zip_code: "",
+      country: "",
       tithe_pay: false,
       tithe_pay_type: "",
       ...defaultDynamicValues,
@@ -288,7 +301,7 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
           <div className="text-2xl font-bold">{memberData ? "Edit Member" : "Add Member"}</div>
 
           <div className="flex gap-3">
-            <Button type="button" onClick={onClose} variant="secondary"><X /> Close</Button>
+            <Button type="button" onClick={onClose} variant="outline"><X /> Close</Button>
 
             <Button type="button" onClick={() => form.handleSubmit(onSubmit)()}><Check /> {memberData ? 'Update' : 'Save'}</Button>
 
@@ -437,7 +450,7 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
               )}
             />
 
-            <FormField
+            {/* <FormField
               control={form.control}
               name="phone"
               render={({ field }) => (
@@ -445,6 +458,23 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
                   <FormLabel>Phone</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter Phone Number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            /> */}
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                <FormLabel>Phone number</FormLabel>
+                  <FormControl>
+                    <PhoneInput
+                      placeholder="Enter Phone Number"
+                      {...field}
+                      defaultCountry="SG"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -475,6 +505,86 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
                 </FormItem>
               )}
             />
+
+            <div className="col-span-2">
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Address</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Enter your address"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <div className="col-span-2 grid grid-cols-4 gap-5">
+              <FormField
+                control={form.control}
+                name="city"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>City</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter City" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="state"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>State</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter State" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="zip_code"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ZIP Code</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter ZIP Code" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="country"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Country</FormLabel>
+                    <CountryDropdown
+                      defaultValue={field.value || "SGP"}
+                      onChange={(country) => {
+                        field.onChange(country.alpha3);
+                      }}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <div className="col-span-2 rounded border p-4">
               <div className="grid grid-cols-2 gap-5 items-center">

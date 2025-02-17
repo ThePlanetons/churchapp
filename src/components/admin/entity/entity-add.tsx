@@ -108,7 +108,7 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
           </div>
 
           <div className="flex gap-3">
-            <Button type="button" onClick={onClose} variant="secondary">
+            <Button type="button" onClick={onClose} variant="outline">
               <X className="mr-2 h-4 w-4" /> Close
             </Button>
 

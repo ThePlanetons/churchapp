@@ -201,7 +201,7 @@ function MemberList({ onAddMember, onConfigureMember }: { onAddMember: (memberDa
   return (
     <div>
       <div className="flex flex-row items-center justify-between px-4 py-3 border-b">
-        <div className="text-2xl font-semibold">Member List</div>
+        <div className="text-2xl font-bold">Member List</div>
 
         <div className="flex flex-row items-center gap-3">
           <ExcelExportButton
@@ -242,13 +242,13 @@ function MemberList({ onAddMember, onConfigureMember }: { onAddMember: (memberDa
 
       <Table id="table-to-pdf">
         <TableHeader
-          className="bg-lime-400"
+          className="bg-primary"
         >
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
+            <TableRow key={headerGroup.id} className="hover:bg-transparent">
               {headerGroup.headers.map((header) => (
                 <TableHead key={header.id}
-                  className="h-14 text-black tracking-wide"
+                  className="h-14 text-white tracking-wide"
                 >
                   {header.isPlaceholder
                     ? null
@@ -292,7 +292,7 @@ function MemberList({ onAddMember, onConfigureMember }: { onAddMember: (memberDa
         </TableBody>
       </Table>
 
-      <div className="flex items-center justify-end space-x-2 px-2 h-14 bg-lime-400 rounded-b-xl">
+      <div className="flex items-center justify-end space-x-2 px-2 h-14 bg-primary rounded-b-md">
         <Button
           variant="outline"
           size="sm"

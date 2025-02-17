@@ -241,9 +241,9 @@ function CollationList({ onAddMember, onConfigureMember }: CollationListProps) {
 
       {/* Table */}
       <Table id="table-to-pdf">
-        <TableHeader className="bg-lime-400">
+        <TableHeader className="bg-primary">
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
+            <TableRow key={headerGroup.id} className="hover:bg-transparent">
               {headerGroup.headers.map((header) => (
                 <TableHead
                   key={header.id}
@@ -282,7 +282,7 @@ function CollationList({ onAddMember, onConfigureMember }: CollationListProps) {
       </Table>
 
       {/* Pagination */}
-      <div className="flex items-center justify-end space-x-2 px-2 h-14 bg-lime-400 rounded-b-xl">
+      <div className="flex items-center justify-end space-x-2 px-2 h-14 bg-primary rounded-b-xl">
         <Button
           variant="outline"
           size="sm"

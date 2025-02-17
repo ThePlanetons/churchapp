@@ -101,10 +101,10 @@ function EntityList({ onAddMember }: { onAddMember: (memberData: any) => void })
 
       <Table>
         <TableHeader
-          className="bg-lime-400"
+          className="bg-primary"
         >
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
+            <TableRow key={headerGroup.id} className="hover:bg-transparent">
               {headerGroup.headers.map((header) => (
                 <TableHead key={header.id}
                   className="h-14 text-black tracking-wide">
@@ -148,7 +148,7 @@ function EntityList({ onAddMember }: { onAddMember: (memberData: any) => void })
         </TableBody>
       </Table>
 
-      <div className="flex items-center justify-end space-x-2 px-2 h-14 bg-lime-400 rounded-b-xl">
+      <div className="flex items-center justify-end space-x-2 px-2 h-14 bg-primary rounded-b-xl">
         <Button
           variant="outline"
           size="sm"

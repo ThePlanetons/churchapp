@@ -10,7 +10,7 @@ export default function MemberManagement() {
   const [selectedMember, setSelectedMember] = useState<any>(null);
 
   return (
-    <Card className="h-full">
+    <div className="h-full border rounded-md shadow-md bg-white">
       {view === "list" && (
         <MemberList
           onAddMember={(memberData) => {
@@ -29,6 +29,6 @@ export default function MemberManagement() {
       {view === "configure" && (
         <ConfigureMember onClose={() => setView("list")} />
       )}
-    </Card>
+    </div>
   );
 }
