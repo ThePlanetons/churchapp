@@ -28,7 +28,7 @@ const items = [
     icon: BookUser,
   },
   {
-    title: "Collation",
+    title: "Collection",
     url: "/admin/collation",
     icon: HandCoins,
   },

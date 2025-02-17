@@ -39,6 +39,7 @@ interface FormValues {
   associatedEntity: string;
   date: string;
   amount: string;
+  transaction_type: string; // New transaction type field
   collectFirstApprover: string;
   collectSecondApprover: string;
 }
@@ -65,6 +66,7 @@ export function AddCollation({
       associatedEntity: "",
       date: "",
       amount: "",
+      transaction_type: "",
       collectFirstApprover: "",
       collectSecondApprover: "",
     },
@@ -113,23 +115,23 @@ export function AddCollation({
   }, [axiosInstance, toast]);
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    if (!data.member || !data.date || !data.amount) {
+    if (!data.member || !data.date || !data.amount || !data.transaction_type) {
       toast({
         variant: "destructive",
         title: "Missing Information",
         description:
-          "Please select a member and enter a date and amount",
+          "Please select a member and enter a date, amount and transaction type",
       });
       return;
     }
 
     // Build the request body using the required parameter names
     const requestBody = {
-      collection_type: selectedTab.toLowerCase(),  // e.g., "Tithes", "Mission", etc.
+      collection_type: selectedTab.toLowerCase(), // e.g., "tithes", "mission", etc.
       collection_amount: parseFloat(data.amount),
       transaction_date: data.date,
-      transaction_type: "cash",
-      created_by: localStorage.getItem("name"), 
+      transaction_type: data.transaction_type,
+      created_by: localStorage.getItem("name"),
       member: Number(data.member),
     };
 
@@ -150,7 +152,6 @@ export function AddCollation({
       );
       console.log("Collection created:", response.data);
       toast({
-        //variant: "success",
         title: "Collection Created",
         description: "The collection has been successfully created.",
       });
@@ -295,17 +296,31 @@ export function AddCollation({
               />
             </div>
 
-            {/* Date & Amount */}
+            {/* Transaction Details (Common Fields) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
               <FormField
                 control={form.control}
-                name="date"
-                rules={{ required: "Date is required" }}
+                name="transaction_type"
+                rules={{ required: "Transaction Type is required" }}
                 render={({ field, fieldState: { error } }) => (
                   <FormItem>
-                    <FormLabel>Date</FormLabel>
+                    <FormLabel>Transaction Type</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Select
+                        onValueChange={(value: string) => field.onChange(value)}
+                        value={field.value}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select transaction type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="cash">Cash</SelectItem>
+                          <SelectItem value="cheque">Cheque</SelectItem>
+                          <SelectItem value="paynow">PayNow</SelectItem>
+                          <SelectItem value="others">Others</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                     {error && <FormMessage>{error.message}</FormMessage>}
                   </FormItem>
@@ -330,10 +345,22 @@ export function AddCollation({
                   </FormItem>
                 )}
               />
-            </div>
-
-            {/* Approvers */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 px-7 py-3 border ">
+              <FormField
+                control={form.control}
+                name="date"
+                rules={{ required: "Date is required" }}
+                render={({ field, fieldState: { error } }) => (
+                  <FormItem>
+                    <FormLabel>Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    {error && <FormMessage>{error.message}</FormMessage>}
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="collectFirstApprover"
@@ -370,7 +397,7 @@ export function AddCollation({
                 name="collectSecondApprover"
                 render={({ field, fieldState: { error } }) => (
                   <FormItem>
-                    <FormLabel>Collect Second Approve</FormLabel>
+                    <FormLabel>Collect Second Approver</FormLabel>
                     <FormControl>
                       <Select
                         onValueChange={(value: string) => field.onChange(value)}
