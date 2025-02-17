@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -16,6 +15,9 @@ import { z } from "zod";
 import { format } from "date-fns"
 import { CalendarIcon, Check, Trash, X } from "lucide-react";
 import AxiosInstance from "@/lib/axios";
+import Password from "./user-password";
+// import * as z from "zod";
+import { Input } from "@/components/ui/input";
 
 const genderOptions = [
   { value: "Male", label: "Male" },
@@ -63,11 +65,7 @@ function UserAdd({ onClose, userData }: { onClose: () => void; userData?: any })
   const memberSchema = z.object({
     first_name: z.string().nonempty("First name is required.").min(2, "First name must be at least 2 characters."),
     last_name: z.string().optional(),
-    email: z.string().email("Invalid email address"),
-    date_of_birth: z.string().nonempty("Date of birth is required."),
-    phone: z.string().nonempty("Phone number is required.").min(10, "Phone number must be at least 10 digits."),
-    gender: z.string().min(1, "Gender is required"),
-    ...dynamicSchema,  // Merge dynamic schema
+
   });
 
   const defaultDynamicValues = configData?.reduce((acc: any, item: any) => {
@@ -80,11 +78,7 @@ function UserAdd({ onClose, userData }: { onClose: () => void; userData?: any })
     defaultValues: userData || {
       first_name: "",
       last_name: "",
-      email: "",
-      date_of_birth: "",
-      phone: "",
-      gender: "",
-      ...defaultDynamicValues,
+
     },
     // mode: "onChange", // Enable real-time validation
   });
@@ -114,24 +108,18 @@ function UserAdd({ onClose, userData }: { onClose: () => void; userData?: any })
 
   function onSubmit(values: z.infer<typeof memberSchema>) {
     const name = localStorage.getItem("name");
+    (userData ? (values as any).updated_by = name : (values as any).created_by = name);
 
-    userData ? values.updated_by = name : values.created_by = name;
-
-    const dynamicFields: Record<string, any> = {};
-    if (configData) {
-      configData.forEach((item: any) => {
-        dynamicFields[item.dynamic_input.name] = values[item.dynamic_input.name] || "";
-      });
-    }
-
-    const requestData = {
-      ...values,
-      dynamic_fields: dynamicFields,  // Store dynamic fields in JSON format
+    const config = {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        "Content-Type": "application/json",
+      },
     };
 
     const request = userData
-      ? axiosInstance.put(`members/${userData.id}/`, requestData) // Update request for editing
-      : axiosInstance.post(`members/`, requestData); // Create request for adding
+      ? axiosInstance.put(`members/${userData.id}/`, userData) // Update request for editing
+      : axiosInstance.post(`members/`, userData); // Create request for adding
 
     request
       .then(() => {
@@ -234,116 +222,48 @@ function UserAdd({ onClose, userData }: { onClose: () => void; userData?: any })
 
             <FormField
               control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>User Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter User Name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Email Id</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter Email" {...field} />
+                    <Input placeholder="Enter Email Id" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="date_of_birth"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Date of birth</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
+              <Password></Password>
 
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value ? new Date(field.value) : undefined}
-                        onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : "")}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date("1900-01-01")
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
+              <FormField
               control={form.control}
-              name="phone"
+              name="confirm_password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Phone</FormLabel>
+                  <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter Phone Number" {...field} />
+                    <Input placeholder="Enter Confirm Password" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="gender"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Gender</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a gender" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {genderOptions.map((gender) => (
-                        <SelectItem key={gender.value} value={gender.value}>
-                          {gender.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {configData && configData.map((item: any) => {
-              const { label, name, placeholder, required, type } = item.dynamic_input;
-              const dynamicValue = form.watch(name) || "";
-
-              return (
-                <FormField key={name} control={form.control} name={name} render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{label}</FormLabel>
-                    <FormControl>
-                      <Input placeholder={placeholder} {...field} required={required} type={type} value={dynamicValue} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-              );
-            })}
           </form>
         </Form>
       </div>
