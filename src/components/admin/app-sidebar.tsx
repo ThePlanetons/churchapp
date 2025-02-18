@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
-import { Home, Inbox, Search, Settings, User, Users, HandCoins,BookUser } from "lucide-react"
+import { Link, useLocation } from "react-router-dom";
+import { Home, Inbox, Search, Settings, User, Users, HandCoins, BookUser } from "lucide-react"
 
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem
@@ -29,7 +29,7 @@ const items = [
   },
   {
     title: "Collection",
-    url: "/admin/collation",
+    url: "/admin/collection",
     icon: HandCoins,
   },
   {
@@ -40,24 +40,52 @@ const items = [
 ]
 
 export function AppSidebar() {
+  const location = useLocation();
+
   return (
     <Sidebar>
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Application</SidebarGroupLabel>
+      {/* --primary: 249 71% 65%; /* #7565E6 */}
+      {/* className="bg-[#151529]" - velzon */}
+      {/* <SidebarContent className="bg-[#1e40af]"> - midone */}
+      <SidebarContent className="bg-[#0F172A]"> 
+        <SidebarGroup className="gap-5 py-5">
+          <SidebarGroupLabel className="text-2xl font-bold text-[#F6F6F5] tracking-wider">Victory Harvest</SidebarGroupLabel>
 
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
+              {items.map((item) => {
+                const isActive = location.pathname === item.url;
+
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    {/* ${isActive ? "text-[#f7f7f7]" : "text-[#a3a6b7]"} - velzon */}
+                    <SidebarMenuButton
+                      asChild
+                      className={`text-md py-5 px-3 hover:text-[#F6F6F5] hover:bg-[#2C3344] tracking-wider
+                      ${isActive ? "text-[#F6F6F5] bg-[#2C3344]" : "text-[#babdc2]"}
+                      `}
+                    >
+                      <Link to={item.url} className="flex items-center gap-3">
+                        <item.icon
+                          style={{ width: "18px", height: "18px" }}
+                          className={isActive ? "" : "text-inherit"}
+                        />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+              {/* {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link to={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
+                  <SidebarMenuButton asChild className="text-[#F6F6F5] text-md font-medium py-5 hover:border hover:border-[#8e89f0] hover:text-[#8e89f0]">
+                    <Link to={item.url} className="flex items-center gap-3">
+                      <item.icon style={{ width: "22px", height: "22px" }} />
+                      <span className="tracking-wide">{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}
+              ))} */}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

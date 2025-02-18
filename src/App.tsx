@@ -38,7 +38,7 @@ function App() {
           <Route path="/admin/members" element={<MemberManagement />} />
           <Route path="/admin/settings" element={<Settings />} />
           <Route path="/admin/entity" element={<Entity />} />
-          <Route path="/admin/collation" element={<Collation />} />
+          <Route path="/admin/collection" element={<Collation />} />
         </Route>
       </Routes>
     </BrowserRouter>
