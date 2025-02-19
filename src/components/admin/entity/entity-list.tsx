@@ -6,21 +6,42 @@ import axios from "axios";
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { ColumnDef, flexRender, getCoreRowModel, getPaginationRowModel, getSortedRowModel, SortingState, useReactTable } from "@tanstack/react-table"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  SortingState,
+  useReactTable,
+} from "@tanstack/react-table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 type Entity = {
+  id?: number;
   name: string;
   code: string;
-
-  id?: number;
+  city: string;
   created_at?: string;
   created_by?: string;
   updated_at?: string;
   updated_by?: string;
-}
+};
 
-const SortableHeader = ({ column, title }: { column: any; title: string }) => {
+const SortableHeader = ({
+  column,
+  title,
+}: {
+  column: any;
+  title: string;
+}) => {
   const isSorted = column.getIsSorted();
 
   return (
@@ -42,17 +63,28 @@ const columns: ColumnDef<Entity>[] = [
   },
   {
     accessorKey: "code",
-    header: ({ column }) => <SortableHeader column={column} title="Entity Code" />,
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Entity Code" />
+    ),
   },
   {
     accessorKey: "name",
-    header: ({ column }) => <SortableHeader column={column} title="Entity Name" />,
-  }
+    header: ({ column }) => (
+      <SortableHeader column={column} title="Entity Name" />
+    ),
+  },
+  {
+    accessorKey: "city",
+    header: ({ column }) => <SortableHeader column={column} title="City" />,
+  },
 ];
 
-function EntityList({ onAddMember }: { onAddMember: (memberData: any) => void }) {
-  const [sorting, setSorting] = React.useState<SortingState>([])
-
+function EntityList({
+  onAddMember,
+}: {
+  onAddMember: (memberData: any) => void;
+}) {
+  const [sorting, setSorting] = React.useState<SortingState>([]);
   const [members, setMembers] = useState<Entity[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const { toast } = useToast();
@@ -100,20 +132,20 @@ function EntityList({ onAddMember }: { onAddMember: (memberData: any) => void })
       </div>
 
       <Table>
-        <TableHeader
-          className="bg-primary"
-        >
+        <TableHeader className="bg-primary">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="hover:bg-transparent">
               {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}
-                  className="h-14 text-black tracking-wide">
+                <TableHead
+                  key={header.id}
+                  className="h-14 text-black tracking-wide"
+                >
                   {header.isPlaceholder
                     ? null
                     : flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                 </TableHead>
               ))}
             </TableRow>
@@ -166,7 +198,7 @@ function EntityList({ onAddMember }: { onAddMember: (memberData: any) => void })
           Next
         </Button>
       </div>
-    </div >
+    </div>
   );
 }
 

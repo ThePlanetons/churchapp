@@ -7,39 +7,86 @@ import { Input } from "@/components/ui/input";
 import axios from "axios";
 import { z } from "zod";
 import { Check, Trash, X } from "lucide-react";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { PhoneInput } from "@/components/ui/phone-input";
+import { CountryDropdown } from "@/components/ui/country-dropdown";
+import { Textarea } from "@/components/ui/textarea";
 
 type Entity = {
-  name: string;
   code: string;
+  name: string;
+  phone: string;
+  alternative_phone?: string;
+  address: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  country: string;
   id?: number;
   created_at?: string;
   created_by?: string;
   updated_at?: string;
   updated_by?: string;
-}
+};
 
-function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: any }) {
+const entitySchema = z.object({
+  code: z.string().nonempty("Entity Code is required."),
+  name: z.string().nonempty("Entity Name is required."),
+  phone: z.string().nonempty("Phone Number is required."),
+  alternative_phone: z.string().optional(),
+  address: z.string().nonempty("Address is required."),
+  city: z.string().nonempty("City is required."),
+  state: z.string().nonempty("State is required."),
+  zip_code: z.string().nonempty("ZIP Code is required."),
+  country: z.string().nonempty("Country is required."),
+});
+
+function EntityAdd({
+  onClose,
+  memberData,
+}: {
+  onClose: () => void;
+  memberData?: Entity;
+}) {
   const { toast } = useToast();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const entitySchema = z.object({
-    code: z.string().nonempty("Entity Code is required."),
-    name: z.string().nonempty("Entity Name is required."),
-  });
-
-  const form = useForm({
+  const form = useForm<z.infer<typeof entitySchema>>({
     resolver: zodResolver(entitySchema),
     defaultValues: memberData || {
       code: "",
       name: "",
+      phone: "",
+      alternative_phone: "",
+      address: "",
+      city: "",
+      state: "",
+      zip_code: "",
+      country: "SGP",
     },
   });
 
   function onSubmit(values: z.infer<typeof entitySchema>) {
-    const name = localStorage.getItem("name");
-    (memberData ? (values as any).updated_by = name : (values as any).created_by = name);
+    const userName = localStorage.getItem("name") || "Unknown";
+    if (memberData) {
+      (values as any).updated_by = userName;
+    } else {
+      (values as any).created_by = userName;
+    }
 
     const config = {
       headers: {
@@ -49,7 +96,11 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
     };
 
     const request = memberData
-      ? axios.put(`http://127.0.0.1:8000/api/entities/${memberData.id}/`, values, config)
+      ? axios.put(
+          `http://127.0.0.1:8000/api/entities/${memberData.id}/`,
+          values,
+          config
+        )
       : axios.post("http://127.0.0.1:8000/api/entities/", values, config);
 
     request
@@ -57,11 +108,13 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
         toast({
           variant: "default",
           title: "Success",
-          description: memberData ? "Entity updated successfully!" : "Entity added successfully!",
+          description: memberData
+            ? "Entity updated successfully!"
+            : "Entity added successfully!",
         });
         onClose();
       })
-      .catch((error) => {
+      .catch(() => {
         toast({
           variant: "destructive",
           title: "Error",
@@ -72,6 +125,7 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
 
   function handleDelete() {
     if (!memberData) return;
+
     const config = {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("access_token")}`,
@@ -79,7 +133,8 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
       },
     };
 
-    axios.delete(`http://127.0.0.1:8000/api/entities/${memberData.id}/`, config)
+    axios
+      .delete(`http://127.0.0.1:8000/api/entities/${memberData.id}/`, config)
       .then(() => {
         toast({
           variant: "default",
@@ -89,7 +144,7 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
         setShowDeleteConfirm(false);
         onClose();
       })
-      .catch((error) => {
+      .catch(() => {
         toast({
           variant: "destructive",
           title: "Error",
@@ -101,6 +156,7 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
 
   return (
     <div>
+      {/* Header Section */}
       <div className="flex flex-col justify-between px-4 py-3 border-b">
         <div className="flex justify-between items-center w-full">
           <div className="text-2xl font-bold">
@@ -112,18 +168,18 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
               <X className="mr-2 h-4 w-4" /> Close
             </Button>
 
-            <Button 
-              type="button" 
+            <Button
+              type="button"
               onClick={() => form.handleSubmit(onSubmit)()}
               disabled={form.formState.isSubmitting}
             >
-              <Check className="mr-2 h-4 w-4" /> 
-              {memberData ? 'Update' : 'Save'}
+              <Check className="mr-2 h-4 w-4" />
+              {memberData ? "Update" : "Save"}
             </Button>
 
             {memberData && (
-              <Button 
-                type="button" 
+              <Button
+                type="button"
                 onClick={() => setShowDeleteConfirm(true)}
                 variant="destructive"
               >
@@ -134,53 +190,229 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
         </div>
       </div>
 
+            {/* Show Created/Updated Info */}
+            {memberData && (
+    <div className="px-4 py-2 text-xm  text-gray-500 bg-gray-100 border-t border-gray-200 mt-2 text-right italic">
+        {memberData.updated_by ? (
+            <>
+                <span className="font-medium text-gray-600">Last updated:</span> 
+                <span className="font-bold">{memberData.updated_by} • 
+
+                {memberData.updated_at
+                    ? new Date(memberData.updated_at).toLocaleString()
+                    : "N/A"}
+                    </span>
+            </>
+        ) : (
+            <>
+                <span className="font-medium text-gray-600">Created:</span> 
+                <span className="font-bold">{memberData.created_by} • 
+                {memberData.created_at
+                    ? new Date(memberData.created_at).toLocaleString()
+                    : "N/A"}
+                    </span>
+            </>
+        )}
+    </div>
+)}
+
+      {/* Form Section */}
       <div className="p-4">
         <Form {...form}>
-          <form className="grid grid-cols-2 gap-5">
-            <FormField
-              control={form.control}
-              name="code"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Entity Code
-                    <span className="text-destructive"> *</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Enter Entity Code" 
-                      {...field} 
-                      disabled={form.formState.isSubmitting}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="grid grid-cols-4 gap-5"
+          >
+            {/* Code Field */}
+            <div className="col-span-4 md:col-span-2">
+              <FormField
+                control={form.control}
+                name="code"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Entity Code<span className="text-destructive"> *</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter Entity Code"
+                        {...field}
+                        disabled={form.formState.isSubmitting}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Entity Name
-                    <span className="text-destructive"> *</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Enter Entity Name" 
-                      {...field} 
-                      disabled={form.formState.isSubmitting}
+            {/* Name Field */}
+            <div className="col-span-4 md:col-span-2">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Entity Name<span className="text-destructive"> *</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter Entity Name"
+                        {...field}
+                        disabled={form.formState.isSubmitting}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Primary Phone Field */}
+            <div className="col-span-4 md:col-span-2">
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Phone Number<span className="text-destructive"> *</span>
+                    </FormLabel>
+                    <FormControl>
+                      <PhoneInput
+                        placeholder="Enter Phone Number"
+                        {...field}
+                        defaultCountry="SG"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Alternative Phone Field */}
+            <div className="col-span-4 md:col-span-2">
+              <FormField
+                control={form.control}
+                name="alternative_phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Alternative Phone Number</FormLabel>
+                    <FormControl>
+                      <PhoneInput
+                        placeholder="Enter Alternative Phone Number"
+                        {...field}
+                        defaultCountry="SG"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Address Field */}
+            <div className="col-span-4">
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Address<span className="text-destructive"> *</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Enter your address" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* City Field */}
+            <div className="col-span-2 xl:col-span-1">
+              <FormField
+                control={form.control}
+                name="city"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      City<span className="text-destructive"> *</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter City" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* State Field */}
+            <div className="col-span-2 xl:col-span-1">
+              <FormField
+                control={form.control}
+                name="state"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      State<span className="text-destructive"> *</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter State" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* ZIP Code Field */}
+            <div className="col-span-2 xl:col-span-1">
+              <FormField
+                control={form.control}
+                name="zip_code"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      ZIP Code<span className="text-destructive"> *</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter ZIP Code" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Country Field */}
+            <div className="col-span-2 xl:col-span-1">
+              <FormField
+                control={form.control}
+                name="country"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Country<span className="text-destructive"> *</span>
+                    </FormLabel>
+                    <CountryDropdown
+                      defaultValue={field.value || "SGP"}
+                      onChange={(country) => field.onChange(country.alpha3)}
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </form>
         </Form>
       </div>
+
+
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
@@ -188,19 +420,16 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
           <DialogHeader>
             <DialogTitle>Are you absolutely sure?</DialogTitle>
             <p className="mt-2">
-              This action cannot be undone. This will permanently delete the entity 
-              and all its associated data.
+              This action cannot be undone. This will permanently delete the
+              entity and all its associated data.
             </p>
           </DialogHeader>
           <DialogFooter className="mt-4">
-            <Button 
-              variant="outline" 
-              onClick={() => setShowDeleteConfirm(false)}
-            >
+            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>
               Cancel
             </Button>
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
               onClick={handleDelete}
               disabled={form.formState.isSubmitting}
             >
