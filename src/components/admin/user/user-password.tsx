@@ -1,13 +1,19 @@
 "use client";
-
+import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Check, Eye, EyeOff, X } from "lucide-react";
 import { useId, useMemo, useState } from "react";
 
-export default function Password() {
+interface PasswordProps {
+  password: string;
+  setPassword: (value: string) => void;
+  error?: any;
+}
+
+export default function Password({ password, setPassword, error }: PasswordProps) {
   const id = useId();
-  const [password, setPassword] = useState("");
+  // const [password, setPassword] = useState("");
   const [isVisible, setIsVisible] = useState<boolean>(false);
 
   const toggleVisibility = () => setIsVisible((prevState) => !prevState);
@@ -46,7 +52,7 @@ export default function Password() {
     if (score === 3) return "Medium password";
     return "Strong password";
   };
-
+  // const Password: React.FC<PasswordProps> = ({ value, onChange }) => {
   return (
     <div>
       {/* Password input field with toggle visibility button */}
@@ -78,6 +84,12 @@ export default function Password() {
             )}
           </button>
         </div>
+
+        {error && (
+          <p id={`${id}-error`} className="text-red-500 text-[0.8rem]">
+            {error}
+          </p>
+        )}
       </div>
 
       {/* Password strength indicator */}
@@ -92,7 +104,8 @@ export default function Password() {
         <div
           className={`h-full ${getStrengthColor(strengthScore)} transition-all duration-500 ease-out`}
           style={{ width: `${(strengthScore / 4) * 100}%` }}
-        ></div>
+        >
+        </div>
       </div>
 
       {/* Password strength description */}
