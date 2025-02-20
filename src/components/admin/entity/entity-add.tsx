@@ -55,13 +55,7 @@ const entitySchema = z.object({
   country: z.string().nonempty("Country is required."),
 });
 
-function EntityAdd({
-  onClose,
-  memberData,
-}: {
-  onClose: () => void;
-  memberData?: Entity;
-}) {
+function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: Entity }) {
   const { toast } = useToast();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -97,10 +91,10 @@ function EntityAdd({
 
     const request = memberData
       ? axios.put(
-          `http://127.0.0.1:8000/api/entities/${memberData.id}/`,
-          values,
-          config
-        )
+        `http://127.0.0.1:8000/api/entities/${memberData.id}/`,
+        values,
+        config
+      )
       : axios.post("http://127.0.0.1:8000/api/entities/", values, config);
 
     request
@@ -190,31 +184,31 @@ function EntityAdd({
         </div>
       </div>
 
-            {/* Show Created/Updated Info */}
-            {memberData && (
-    <div className="px-4 py-2 text-xm  text-gray-500 bg-gray-100 border-t border-gray-200 mt-2 text-right italic">
-        {memberData.updated_by ? (
+      {/* Show Created/Updated Info */}
+      {memberData && (
+        <div className="px-4 py-2 text-xm  text-gray-500 bg-gray-100 border-t border-gray-200 mt-2 text-right italic">
+          {memberData.updated_by ? (
             <>
-                <span className="font-medium text-gray-600">Last updated:</span> 
-                <span className="font-bold">{memberData.updated_by} • 
+              <span className="font-medium text-gray-600">Last updated:</span>
+              <span className="font-bold">{memberData.updated_by} •
 
                 {memberData.updated_at
-                    ? new Date(memberData.updated_at).toLocaleString()
-                    : "N/A"}
-                    </span>
+                  ? new Date(memberData.updated_at).toLocaleString()
+                  : "N/A"}
+              </span>
             </>
-        ) : (
+          ) : (
             <>
-                <span className="font-medium text-gray-600">Created:</span> 
-                <span className="font-bold">{memberData.created_by} • 
+              <span className="font-medium text-gray-600">Created:</span>
+              <span className="font-bold">{memberData.created_by} •
                 {memberData.created_at
-                    ? new Date(memberData.created_at).toLocaleString()
-                    : "N/A"}
-                    </span>
+                  ? new Date(memberData.created_at).toLocaleString()
+                  : "N/A"}
+              </span>
             </>
-        )}
-    </div>
-)}
+          )}
+        </div>
+      )}
 //hello
 
       {/* Form Section */}

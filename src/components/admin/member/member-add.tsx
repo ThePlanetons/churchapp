@@ -296,7 +296,7 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
 
   return (
     <div>
-      <div className="flex flex-col justify-between px-4 py-3 border-b">
+      <div className="px-4 py-3 border-b">
         <div className="flex justify-between items-center w-full">
           <div className="text-2xl font-bold">{memberData ? "Edit Member" : "Add Member"}</div>
 
