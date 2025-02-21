@@ -14,6 +14,8 @@ import Entity from './components/admin/entity/entity';
 import Collation from './components/admin/collation/collation';
 import Settings from './components/admin/settings';
 import UserManagement from './components/admin/user/user';
+import "../globals.css";
+
 
 function App() {
   // const [count, setCount] = useState(0)

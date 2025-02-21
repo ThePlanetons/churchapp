@@ -47,9 +47,9 @@ export function AppSidebar() {
       {/* --primary: 249 71% 65%; /* #7565E6 */}
       {/* className="bg-[#151529]" - velzon */}
       {/* <SidebarContent className="bg-[#1e40af]"> - midone */}
-      <SidebarContent className="bg-[#0F172A]"> 
+      <SidebarContent className="bg-[#5c5c5c]"> 
         <SidebarGroup className="gap-5 py-5">
-          <SidebarGroupLabel className="text-2xl font-bold text-[#F6F6F5] tracking-wider">Victory Harvest</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-2xl font-bold text-[#ffffff] tracking-wider">Victory Harvest</SidebarGroupLabel>
 
           <SidebarGroupContent>
             <SidebarMenu>
@@ -61,8 +61,8 @@ export function AppSidebar() {
                     {/* ${isActive ? "text-[#f7f7f7]" : "text-[#a3a6b7]"} - velzon */}
                     <SidebarMenuButton
                       asChild
-                      className={`text-md py-5 px-3 hover:text-[#F6F6F5] hover:bg-[#2C3344] tracking-wider
-                      ${isActive ? "text-[#F6F6F5] bg-[#2C3344]" : "text-[#babdc2]"}
+                      className={`text-md py-5 px-3 hover:text-[#F6F6F5] hover:bg-[#2c2c2c] tracking-wider
+                      ${isActive ? "text-[#F6F6F5] bg-[#2c2c2c]" : "text-[#babdc2]"}
                       `}
                     >
                       <Link to={item.url} className="flex items-center gap-3">
