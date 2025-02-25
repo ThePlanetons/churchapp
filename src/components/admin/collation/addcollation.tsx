@@ -40,13 +40,23 @@ interface Entity {
 interface AddCollationProps {
   onClose: () => void;
   memberData?: Member | null;
-  totalAmount?: number; // Total amount in the fund
 }
+
+interface Transaction {
+  member: number | null;
+  collection_type: string;
+  collection_amount: string;
+  transaction_date: string;
+  transaction_type: string;
+
+  id?: number;
+}
+
+type CollectionType = "Tithes" | "Mission" | "Partnership" | "Offering";
 
 export function AddCollation({
   onClose,
-  memberData,
-  totalAmount
+  memberData
 }: AddCollationProps) {
   const { toast } = useToast();
   const [members, setMembers] = useState<Member[]>([]);
@@ -117,10 +127,28 @@ export function AddCollation({
   //   }
   // };
 
-  const displayTotalAmount = totalAmount ?? 0;
+  // const displayTotalAmount = totalAmount ?? 0;
 
   const collectionTypes = ["Tithes", "Mission", "Partnership", "Offering"];
   const [selectedTab, setSelectedTab] = useState(collectionTypes[0]);  // Default to first tab
+
+  const [savedEntries, setSavedEntries] = useState<Record<CollectionType, Transaction[]>>({
+    Tithes: [],
+    Mission: [],
+    Partnership: [],
+    Offering: [],
+  });
+
+  // Calculate individual totals
+  const individualTotals = Object.fromEntries(
+    Object.keys(savedEntries).map((key) => [
+      key,
+      savedEntries[key as CollectionType].reduce((sum, entry) => sum + Number(entry.collection_amount || 0), 0),
+    ])
+  );
+
+  // Calculate grand total
+  const grandTotal = Object.values(individualTotals).reduce((sum, total) => sum + total, 0);
 
   return (
     <div>
@@ -132,9 +160,9 @@ export function AddCollation({
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="text-lg font-semibold">
+            {/* <div className="text-lg font-semibold">
               Total Amount: ${displayTotalAmount.toFixed(2)}
-            </div>
+            </div> */}
 
             <Button type="button" onClick={onClose} variant="outline"><X /> Close</Button>
 
@@ -147,7 +175,7 @@ export function AddCollation({
 
       {/* Tabs */}
       <div className="p-5">
-        <CollectionTransactions></CollectionTransactions>
+        <CollectionTransactions savedEntries={savedEntries} setSavedEntries={setSavedEntries}></CollectionTransactions>
 
         {/* Form */}
         <div className="mt-4">
@@ -235,6 +263,22 @@ export function AddCollation({
               </div>
             </form>
           </Form>
+        </div>
+
+        <div className="my-4 text-lg font-semibold">
+          <h2 className="text-xl font-bold">Total Collection Amounts:</h2>
+          <ul className="list-disc pl-6">
+            {Object.entries(individualTotals).map(([category, total]) => (
+              <li key={category}>
+                {category}: <span className="font-bold text-primary">${total}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Display grand total */}
+        <div className="text-xl font-bold">
+          Grand Total: <span className="text-green-600">${grandTotal}</span>
         </div>
       </div>
     </div>

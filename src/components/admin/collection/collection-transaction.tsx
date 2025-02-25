@@ -28,24 +28,15 @@ interface Transaction {
   id?: number;
 }
 
-// const formSchema = z.object({
-//   entries: z.array(
-//     z.object({
-//       transaction_date: z.string().nonempty("Transaction Date is required."),
-//       transaction_type: z.string().min(1, "Transaction Type is required"),
-//     })
-//   )
-// });
-
 const formSchema = z.object({
   entries: z.record(
     z.enum(["Tithes", "Mission", "Partnership", "Offering"]),
     z.array(
       z.object({
         member: z.coerce.number({ invalid_type_error: "Member is required." }).min(1, "Member is required."),  // Ensure value is greater than 0
-        collection_amount: z.string().nonempty("Transaction Amount is required."),
-        transaction_date: z.string().nonempty("Transaction Date is required."),
-        transaction_type: z.string().min(1, "Transaction Type is required"),
+        collection_amount: z.coerce.number({ invalid_type_error: "Amount is required." }).min(1, "Amount must be greater than 0."),
+        transaction_date: z.string().min(1, "Transaction Date is required."),
+        transaction_type: z.string().min(1, "Transaction Type is required."),
       })
     )
   )
@@ -54,7 +45,12 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 type CollectionType = "Tithes" | "Mission" | "Partnership" | "Offering";
 
-export default function CollectionTransactions() {
+type CollectionTabsProps = {
+  savedEntries: Record<CollectionType, Transaction[]>;
+  setSavedEntries: React.Dispatch<React.SetStateAction<Record<CollectionType, Transaction[]>>>;
+};
+
+export default function CollectionTransactions({ savedEntries, setSavedEntries }: CollectionTabsProps) {
   const { toast } = useToast();
 
   const [membersData, setMembers] = useState<any>(null);
@@ -77,39 +73,12 @@ export default function CollectionTransactions() {
       });
   }, []);
 
-  // const [savedEntries, setSavedEntries] = useState<FormValues["entries"]>([]);
-
-  // const form = useForm<FormValues>({
-  //   resolver: zodResolver(formSchema),
-  //   defaultValues: {
-  //     entries: [{
-  //       transaction_date: "",
-  //       transaction_type: "",
-  //     }]
-  //   }
+  // const [savedEntries, setSavedEntries] = useState<Record<CollectionType, Transaction[]>>({
+  //   Tithes: [],
+  //   Mission: [],
+  //   Partnership: [],
+  //   Offering: []
   // });
-
-  // const { fields, append, remove } = useFieldArray({
-  //   control: form.control,
-  //   name: "entries"
-  // });
-
-  // function onSubmitRow(index: number) {
-  //   const rowValues = form.getValues().entries[index];
-  //   setSavedEntries((prev) => [...prev, rowValues]);
-  //   remove(index);
-
-  //   if (fields.length === 1) {
-  //     append({ transaction_date: "", transaction_type: "" });
-  //   }
-  // }
-
-  const [savedEntries, setSavedEntries] = useState<Record<CollectionType, Transaction[]>>({
-    Tithes: [],
-    Mission: [],
-    Partnership: [],
-    Offering: []
-  });
 
   const [activeTab, setActiveTab] = useState<CollectionType>("Tithes");
 
@@ -130,7 +99,11 @@ export default function CollectionTransactions() {
     name: `entries.${activeTab}`
   });
 
-  function onSubmitRow(index: number) {
+  async function onSubmitRow(index: number) {
+    const isValid = await form.trigger(`entries.${activeTab}.${index}`);
+
+    if (!isValid) return;
+
     const entries = form.getValues().entries[activeTab] || []; // Ensure it exists
     const rowValues = entries[index];
 
@@ -145,7 +118,7 @@ export default function CollectionTransactions() {
         append(
           {
             member: 0,
-            collection_amount: "",
+            collection_amount: 0,
             transaction_date: "",
             transaction_type: ""
           }
@@ -161,16 +134,38 @@ export default function CollectionTransactions() {
     { value: "Others", label: "Others" },
   ];
 
+  // 1st table - collcetion_master
+  // id
+  // collect_amount
+  // collect_date
+  // collect_total_amount
+  // collect_first_approver
+  // collect_second_approver
+
+  // 2nd table - collection_detail
+  // id
+  // collection_id - this match key column in collection master
+  // collection_type
+  // collection_amount
+  // transaction_date
+  // transaction_type
+  const [open, setOpen] = useState(false);
   return (
     <div>
       <Tabs defaultValue="Tithes" onValueChange={(value) => setActiveTab(value as CollectionType)}>
-        <TabsList className="mb-3 h-auto -space-x-px bg-background p-0 shadow-sm shadow-black/5 rtl:space-x-reverse">
-          {["Tithes", "Mission", "Partnership", "Offering"].map((tab) => (
-            <TabsTrigger key={tab} value={tab} className="relative overflow-hidden rounded-none border border-border py-2 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e data-[state=active]:bg-muted data-[state=active]:after:bg-primary">
-              {tab}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <div className="flex flex-row items-center justify-between">
+          <TabsList className="mb-3 h-auto -space-x-px bg-background p-0 shadow-sm shadow-black/5 rtl:space-x-reverse">
+            {["Tithes", "Mission", "Partnership", "Offering"].map((tab) => (
+              <TabsTrigger key={tab} value={tab} className="relative overflow-hidden rounded-none border border-border py-2 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e data-[state=active]:bg-muted data-[state=active]:after:bg-primary">
+                {tab}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          <div>
+            Total <span className="font-semibold">{activeTab}</span> Amount: <span className="font-bold">${savedEntries[activeTab]?.reduce((total, entry) => total + Number(entry.collection_amount || 0), 0)}</span>
+          </div>
+        </div>
 
         {["Tithes", "Mission", "Partnership", "Offering"].map((tab) => (
           <TabsContent key={tab} value={tab}>
@@ -185,12 +180,15 @@ export default function CollectionTransactions() {
                         <FormItem className="w-1/5">
                           <FormLabel>Member</FormLabel>
 
-                          <Select onValueChange={(value) => field.onChange(Number(value))} value={field.value ? String(field.value) : ""}>
+                          <Select
+                            onValueChange={(value) => { field.onChange(value); form.trigger(field.name) }}
+                            value={field.value ? String(field.value) : ""}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select a member" />
                               </SelectTrigger>
                             </FormControl>
+
                             <SelectContent>
                               <SelectGroup>
                                 {membersData && membersData.map((member: any) => (
@@ -201,6 +199,7 @@ export default function CollectionTransactions() {
                               </SelectGroup>
                             </SelectContent>
                           </Select>
+
                           <FormMessage />
                         </FormItem>
                       )}
@@ -212,10 +211,22 @@ export default function CollectionTransactions() {
                       render={({ field }) => (
                         <FormItem className="w-1/5">
                           <FormLabel>Amount</FormLabel>
+
                           <FormControl>
-                            <Input type="number" placeholder="Amount" {...field} />
+                            <Input
+                              type="number"
+                              placeholder="Amount"
+                              // value={field.value as string}
+                              onChange={(e) => {
+                                field.onChange(e.target.value);
+                                form.trigger(field.name);
+                              }}
+                              onBlur={() => form.trigger(field.name)}
+                            />
                             {/* <Input type="number" placeholder="Amount" value={field.value as string} onChange={field.onChange} onBlur={field.onBlur} /> */}
                           </FormControl>
+
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -225,8 +236,9 @@ export default function CollectionTransactions() {
                       name={`entries.${activeTab}.${index}.transaction_date`}
                       render={({ field }) => (
                         <FormItem className="w-1/5">
-                          <FormLabel>Date of Birth</FormLabel>
-                          <Popover>
+                          <FormLabel>Transaction Date</FormLabel>
+
+                          <Popover open={open} onOpenChange={setOpen}>
                             <PopoverTrigger asChild>
                               <FormControl>
                                 <Button
@@ -235,6 +247,7 @@ export default function CollectionTransactions() {
                                     "pl-3 text-left font-normal w-full",
                                     !field.value && "text-muted-foreground"
                                   )}
+                                  onClick={() => setOpen(true)}
                                 >
                                   {field.value ? (
                                     format(field.value, "PPP")
@@ -250,7 +263,11 @@ export default function CollectionTransactions() {
                               <Calendar
                                 mode="single"
                                 selected={field.value ? new Date(field.value) : undefined}
-                                onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : "")}
+                                onSelect={(date) => {
+                                  field.onChange(date ? format(date, "yyyy-MM-dd") : "");
+                                  form.trigger(field.name);
+                                  setOpen(false)
+                                }}
                                 disabled={(date) =>
                                   date > new Date() || date < new Date("1900-01-01")
                                 }
@@ -258,6 +275,7 @@ export default function CollectionTransactions() {
                               />
                             </PopoverContent>
                           </Popover>
+
                           <FormMessage />
                         </FormItem>
                       )}
@@ -269,12 +287,16 @@ export default function CollectionTransactions() {
                       render={({ field }) => (
                         <FormItem className="w-1/5">
                           <FormLabel>Transaction Type</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+
+                          <Select
+                            onValueChange={(value) => { field.onChange(value); form.trigger(field.name) }}
+                            defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="Select a gender" />
+                                <SelectValue placeholder="Select a transaction type" />
                               </SelectTrigger>
                             </FormControl>
+
                             <SelectContent>
                               {transactionTypeOptions.map((transaction) => (
                                 <SelectItem key={transaction.value} value={transaction.value}>
@@ -283,6 +305,7 @@ export default function CollectionTransactions() {
                               ))}
                             </SelectContent>
                           </Select>
+
                           <FormMessage />
                         </FormItem>
                       )}
@@ -293,6 +316,19 @@ export default function CollectionTransactions() {
                       Save
                     </Button>
 
+                    {/* <Button
+                      type="button"
+                      onClick={() => {
+                        form.trigger(`entries.${activeTab}.${index}`).then((isValid) => {
+                          if (isValid) {
+                            onSubmitRow(index);
+                          }
+                        });
+                      }}
+                    >
+                      Save
+                    </Button> */}
+
                     {/* Delete Button */}
                     <Button type="button" variant="destructive" onClick={() => remove(index)}>
                       <Trash2 className="h-4 w-4" />
@@ -300,7 +336,7 @@ export default function CollectionTransactions() {
                   </div>
                 ))}
 
-                <Button type="button" onClick={() => append({ member: 0, collection_amount: "", transaction_date: "", transaction_type: "" })}>
+                <Button type="button" onClick={() => append({ member: 0, collection_amount: 0, transaction_date: "", transaction_type: "" })}>
                   Add Entry
                 </Button>
               </form>
