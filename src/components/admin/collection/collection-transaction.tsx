@@ -45,12 +45,16 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 type CollectionType = "Tithes" | "Mission" | "Partnership" | "Offering";
 
-type CollectionTabsProps = {
+type CollectionTransactions = {
   savedEntries: Record<CollectionType, Transaction[]>;
   setSavedEntries: React.Dispatch<React.SetStateAction<Record<CollectionType, Transaction[]>>>;
+  activeTab: CollectionType;
+  setActiveTab: React.Dispatch<React.SetStateAction<CollectionType>>;
 };
 
-export default function CollectionTransactions({ savedEntries, setSavedEntries }: CollectionTabsProps) {
+export default function CollectionTransactions({
+  savedEntries, setSavedEntries, activeTab, setActiveTab
+}: CollectionTransactions) {
   const { toast } = useToast();
 
   const [membersData, setMembers] = useState<any>(null);
@@ -80,7 +84,7 @@ export default function CollectionTransactions({ savedEntries, setSavedEntries }
   //   Offering: []
   // });
 
-  const [activeTab, setActiveTab] = useState<CollectionType>("Tithes");
+  // const [activeTab, setActiveTab] = useState<CollectionType>("Tithes");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),

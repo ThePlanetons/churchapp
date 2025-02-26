@@ -22,7 +22,21 @@ import {
 import AxiosInstance from "@/lib/axios";
 import CollectionTransactions from "../collection/collection-transaction";
 import { z } from "zod";
-import { X, Check, Trash } from "lucide-react";
+import { X, Check, Trash, DollarSign } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { CircleAlertIcon } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 interface Member {
   id: number;
@@ -127,10 +141,22 @@ export function AddCollation({
   //   }
   // };
 
-  // const displayTotalAmount = totalAmount ?? 0;
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  function handleClose() {
+    const hasEntries = Object.values(savedEntries).some((entries) => entries.length > 0);
+
+    if (hasEntries) {
+      setIsDialogOpen(true);
+    } else {
+      onClose();
+    }
+  }
 
   const collectionTypes = ["Tithes", "Mission", "Partnership", "Offering"];
-  const [selectedTab, setSelectedTab] = useState(collectionTypes[0]);  // Default to first tab
+  const [activeTab, setActiveTab] = useState<CollectionType>("Tithes");
+
+  // const [selectedTab, setSelectedTab] = useState(collectionTypes[0]);  // Default to first tab
 
   const [savedEntries, setSavedEntries] = useState<Record<CollectionType, Transaction[]>>({
     Tithes: [],
@@ -156,7 +182,7 @@ export function AddCollation({
       <div className="px-4 py-3 border-b">
         <div className="flex justify-between items-center w-full">
           <div className="text-2xl font-bold text-center">
-            {memberData ? "Edit Collation" : `New ${selectedTab} Entry`}
+            {memberData ? "Edit Collation" : `New ${activeTab} Entry`}
           </div>
 
           <div className="flex items-center gap-3">
@@ -164,7 +190,7 @@ export function AddCollation({
               Total Amount: ${displayTotalAmount.toFixed(2)}
             </div> */}
 
-            <Button type="button" onClick={onClose} variant="outline"><X /> Close</Button>
+            <Button type="button" onClick={handleClose} variant="outline"><X /> Close</Button>
 
             <Button type="button" onClick={() => form.handleSubmit(onSubmit)()}><Check /> {memberData ? 'Update' : 'Save'}</Button>
 
@@ -175,7 +201,42 @@ export function AddCollation({
 
       {/* Tabs */}
       <div className="p-5">
-        <CollectionTransactions savedEntries={savedEntries} setSavedEntries={setSavedEntries}></CollectionTransactions>
+        <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          {/* <AlertDialogOverlay className="bg-black/10" /> */}
+
+          <AlertDialogContent className="bg-white shadow-lg">
+            <div className="flex flex-col gap-2 max-sm:items-center sm:flex-row sm:gap-4">
+              <div
+                className="flex size-9 shrink-0 items-center justify-center rounded-full border"
+                aria-hidden="true"
+              >
+                <CircleAlertIcon className="opacity-80" size={16} />
+              </div>
+
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete your account? All your data will be removed.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+            </div>
+
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setIsDialogOpen(false)}>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={() => {
+                setIsDialogOpen(false);
+                onClose()
+              }}
+              >
+                Yes, Close
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        <CollectionTransactions savedEntries={savedEntries} setSavedEntries={setSavedEntries}
+          activeTab={activeTab} setActiveTab={setActiveTab}>
+        </CollectionTransactions>
 
         {/* Form */}
         <div className="mt-4">
@@ -265,8 +326,9 @@ export function AddCollation({
           </Form>
         </div>
 
-        <div className="my-4 text-lg font-semibold">
+        {/* <div className="my-4 text-lg font-semibold">
           <h2 className="text-xl font-bold">Total Collection Amounts:</h2>
+
           <ul className="list-disc pl-6">
             {Object.entries(individualTotals).map(([category, total]) => (
               <li key={category}>
@@ -274,12 +336,40 @@ export function AddCollation({
               </li>
             ))}
           </ul>
-        </div>
+        </div> */}
+
 
         {/* Display grand total */}
-        <div className="text-xl font-bold">
+        <div className="flex justify-center text-xl font-bold mt-5">
           Grand Total: <span className="text-green-600">${grandTotal}</span>
         </div>
+
+        <div className="my-4">
+          <div className="mx-auto flex justify-center gap-3 w-full max-w-xs bg-transparent">
+            {collectionTypes.map((tab) => (
+              <Card
+                key={tab}
+                className={`group flex flex-col items-center justify-center p-3 shadow-none border-primary cursor-pointer transition-all min-w-[140px] flex-1 ${activeTab === tab ? "bg-primary/70 border-none text-white" : ""}`}
+              >
+                <div className="font-semibold">{tab}</div>
+
+                <div className="mt-0.5 text-lg font-bold group-[.active]:text-white">
+                  ${individualTotals[tab] || 0}
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* <Tabs defaultValue={activeTab} onValueChange={(value) => setActiveTab(value as CollectionType)}>
+          <TabsList className="mx-auto flex w-full max-w-xs bg-transparent">
+            {collectionTypes.map((tab) => (
+              <TabsTrigger key={tab} value={tab} className="group data-[state=active]:bg-primary/70 flex-1 flex-col p-3 text-md data-[state=active]:shadow-none">
+                {tab}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs> */}
       </div>
     </div>
   );
