@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Form,
   FormControl,
@@ -20,9 +19,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import AxiosInstance from "@/lib/axios";
-import CollectionTransactions from "../collection/collection-transaction";
+import CollectionTransactions from "./collection-transaction";
 import { z } from "zod";
-import { X, Check, Trash, DollarSign } from "lucide-react";
+import { X, Check, Trash } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,12 +30,11 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogOverlay,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { CircleAlertIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { API_ENDPOINTS } from "@/config/api-endpoints";
 
 interface Member {
   id: number;
@@ -46,10 +44,10 @@ interface Member {
   dynamic_fields: Record<string, any>;
 }
 
-interface Entity {
-  id: number;
-  name: string;
-}
+// interface Entity {
+//   id: number;
+//   name: string;
+// }
 
 interface AddCollationProps {
   onClose: () => void;
@@ -74,14 +72,13 @@ export function AddCollation({
 }: AddCollationProps) {
   const { toast } = useToast();
   const [members, setMembers] = useState<Member[]>([]);
-  const [entities, setEntities] = useState<Entity[]>([]);
-  const [loading, setLoading] = useState(true);
+  // const [entities, setEntities] = useState<Entity[]>([]);
 
   const form = useForm({
     defaultValues: {
       date: "",
-      collectFirstApprover: "",
-      collectSecondApprover: "",
+      first_approver: "",
+      second_approver: "",
     },
   });
 
@@ -95,21 +92,16 @@ export function AddCollation({
     return usernameKey ? member.dynamic_fields[usernameKey] : "N/A";
   };
 
-  const getEntityName = (entityId: number) => {
-    const entity = entities.find((e) => e.id === entityId);
-    return entity ? entity.name : "N/A";
-  };
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [membersResponse, entitiesResponse] = await Promise.all([
+        const [membersResponse] = await Promise.all([
           axiosInstance.get("members/"),
           axiosInstance.get("entities/"),
         ]);
 
         setMembers(membersResponse.data || []);
-        setEntities(entitiesResponse.data || []);
+        // setEntities(entitiesResponse.data || []);
       } catch (error) {
         toast({
           variant: "destructive",
@@ -117,7 +109,6 @@ export function AddCollation({
           description: "Failed to fetch required information",
         });
       } finally {
-        setLoading(false);
       }
     };
 
@@ -127,6 +118,36 @@ export function AddCollation({
   // typeof memberSchema
   function onSubmit(values: z.infer<any>) {
     console.log("🚀 ~ onSubmit ~ values:", values)
+    console.log(savedEntries);
+
+    const combinedPayload = {
+      ...values,
+      ...savedEntries,
+    };
+
+    const request = memberData
+      ? axiosInstance.put(`${API_ENDPOINTS.COLLECTIONS}save_collection/`, combinedPayload)
+      : axiosInstance.post(`${API_ENDPOINTS.COLLECTIONS}save_collection/`, combinedPayload);
+
+    request
+      .then(() => {
+        toast({
+          variant: "default",
+          title: "Success",
+          description: memberData
+            ? "Collection updated successfully!"
+            : "Collection added successfully!",
+        });
+
+        onClose();
+      })
+      .catch(() => {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to add/update collection. Please try again.",
+        });
+      });
   }
 
   // const onSubmit: SubmitHandler<FormValues> = async (data) => {
@@ -182,7 +203,7 @@ export function AddCollation({
       <div className="px-4 py-3 border-b">
         <div className="flex justify-between items-center w-full">
           <div className="text-2xl font-bold text-center">
-            {memberData ? "Edit Collation" : `New ${activeTab} Entry`}
+            {memberData ? `Edit ${activeTab}` : `Add ${activeTab}`}
           </div>
 
           <div className="flex items-center gap-3">
@@ -260,7 +281,7 @@ export function AddCollation({
 
                 <FormField
                   control={form.control}
-                  name="collectFirstApprover"
+                  name="first_approver"
                   render={({ field, fieldState: { error } }) => (
                     <FormItem>
                       <FormLabel>Collect First Approver</FormLabel>
@@ -292,7 +313,7 @@ export function AddCollation({
 
                 <FormField
                   control={form.control}
-                  name="collectSecondApprover"
+                  name="second_approver"
                   render={({ field, fieldState: { error } }) => (
                     <FormItem>
                       <FormLabel>Collect Second Approver</FormLabel>

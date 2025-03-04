@@ -33,8 +33,7 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
   const { toast } = useToast();
   const [configData, setConfigData] = useState<any>(null);
   const [entitiesData, setEntities] = useState<any>(null);
-  const [formReady, setFormReady] = useState(false); // Prevents rendering before schema is ready
-  const [loading, setLoading] = useState<boolean>(true);
+  // const [loading, setLoading] = useState<boolean>(true);
 
   // Create the Axios instance with toast
   const axiosInstance = useMemo(() => AxiosInstance(toast), [toast]);
@@ -44,10 +43,10 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
       .get("http://127.0.0.1:8000/api/members/config/")
       .then((response) => {
         setConfigData(response.data);
-        setLoading(false);
+        // setLoading(false);
       })
-      .catch((error) => {
-        setLoading(false);
+      .catch(() => {
+        // setLoading(false);
         toast({
           variant: "destructive",
           title: "Error",
@@ -61,10 +60,10 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
       .get(API_ENDPOINTS.ENTITIES)
       .then((response) => {
         setEntities(response.data);
-        setLoading(false);
+        // setLoading(false);
       })
-      .catch((error) => {
-        setLoading(false);
+      .catch(() => {
+        // setLoading(false);
         toast({
           variant: "destructive",
           title: "Error",

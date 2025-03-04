@@ -58,7 +58,7 @@ function ConfigureMember({ onClose }: { onClose: () => void }) {
     defaultValues,
   });
 
-  const handleConfigSubmit = async (values: z.infer<typeof formSchema>) => {
+  const handleConfigSubmit = async () => {
     const apiUrl = "http://127.0.0.1:8000/api/member/config/list/";
     const accessToken = localStorage.getItem("access_token");
 

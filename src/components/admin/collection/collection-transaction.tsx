@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Box, CalendarIcon, Check, House, PanelsTopLeft, Trash, Trash2 } from "lucide-react";
+import { CalendarIcon, Check, Trash } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { useFieldArray, useForm } from "react-hook-form";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Card } from "@/components/ui/card";
 import { format } from "date-fns"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -68,7 +67,7 @@ export default function CollectionTransactions({
       .then((response) => {
         setMembers(response.data);
       })
-      .catch((error) => {
+      .catch(() => {
         toast({
           variant: "destructive",
           title: "Error",
@@ -153,7 +152,8 @@ export default function CollectionTransactions({
   // collection_amount
   // transaction_date
   // transaction_type
-  const [open, setOpen] = useState(false);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
   return (
     <div>
       <Tabs defaultValue="Tithes" onValueChange={(value) => setActiveTab(value as CollectionType)}>
@@ -176,190 +176,196 @@ export default function CollectionTransactions({
             <Form {...form}>
               <form className="space-y-4">
                 {fields.map((field, index) => (
-                  <div key={field.id} className="flex items-center space-x-4">
-                    <FormField
-                      control={form.control}
-                      name={`entries.${activeTab}.${index}.member`}
-                      render={({ field }) => (
-                        <FormItem className="w-1/5">
-                          <FormLabel>Member</FormLabel>
+                  <div key={field.id} className="flex items-center space-x-4 border rounded-md shadow-md bg-stone-100 p-3">
+                    <div className="w-[90%] flex space-x-4">
+                      <FormField
+                        control={form.control}
+                        name={`entries.${activeTab}.${index}.member`}
+                        render={({ field }) => (
+                          <FormItem className="w-1/4">
+                            <FormLabel>Member</FormLabel>
 
-                          <Select
-                            onValueChange={(value) => { field.onChange(value); form.trigger(field.name) }}
-                            value={field.value ? String(field.value) : ""}>
+                            <Select
+                              onValueChange={(value) => { field.onChange(value); form.trigger(field.name) }}
+                              value={field.value ? String(field.value) : ""}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a member" />
+                                </SelectTrigger>
+                              </FormControl>
+
+                              <SelectContent>
+                                <SelectGroup>
+                                  {membersData && membersData.map((member: any) => (
+                                    <SelectItem key={member.id} value={String(member.id)}>
+                                      {member.id} - {member.first_name} {member.last_name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectGroup>
+                              </SelectContent>
+                            </Select>
+
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name={`entries.${activeTab}.${index}.collection_amount`}
+                        render={({ field }) => (
+                          <FormItem className="w-1/4">
+                            <FormLabel>Amount</FormLabel>
+
                             <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select a member" />
-                              </SelectTrigger>
+                              <Input
+                                type="number"
+                                placeholder="Amount"
+                                // value={field.value as string}
+                                onChange={(e) => {
+                                  field.onChange(e.target.value);
+                                  form.trigger(field.name);
+                                }}
+                                onBlur={() => form.trigger(field.name)}
+                              />
+                              {/* <Input type="number" placeholder="Amount" value={field.value as string} onChange={field.onChange} onBlur={field.onBlur} /> */}
                             </FormControl>
 
-                            <SelectContent>
-                              <SelectGroup>
-                                {membersData && membersData.map((member: any) => (
-                                  <SelectItem key={member.id} value={String(member.id)}>
-                                    {member.id} - {member.first_name} {member.last_name}
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name={`entries.${activeTab}.${index}.transaction_date`}
+                        render={({ field }) => (
+                          <FormItem className="w-1/4">
+                            <FormLabel>Transaction Date</FormLabel>
+
+                            <Popover open={openIndex === index} onOpenChange={(isOpen) => setOpenIndex(isOpen ? index : null)}>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                      "pl-3 text-left font-normal w-full",
+                                      !field.value && "text-muted-foreground"
+                                    )}
+                                    onClick={() => setOpenIndex(index)}
+                                  >
+                                    {field.value ? (
+                                      format(field.value, "PPP")
+                                    ) : (
+                                      <span>Pick a date</span>
+                                    )}
+                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
+
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                  mode="single"
+                                  selected={field.value ? new Date(field.value) : undefined}
+                                  onSelect={(date) => {
+                                    field.onChange(date ? format(date, "yyyy-MM-dd") : "");
+                                    form.trigger(field.name);
+                                    setOpenIndex(null)
+                                  }}
+                                  disabled={(date) =>
+                                    date > new Date() || date < new Date("1900-01-01")
+                                  }
+                                  initialFocus
+                                />
+                              </PopoverContent>
+                            </Popover>
+
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name={`entries.${activeTab}.${index}.transaction_type`}
+                        render={({ field }) => (
+                          <FormItem className="w-1/4">
+                            <FormLabel>Transaction Type</FormLabel>
+
+                            <Select
+                              onValueChange={(value) => { field.onChange(value); form.trigger(field.name) }}
+                              defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a transaction type" />
+                                </SelectTrigger>
+                              </FormControl>
+
+                              <SelectContent>
+                                {transactionTypeOptions.map((transaction) => (
+                                  <SelectItem key={transaction.value} value={transaction.value}>
+                                    {transaction.label}
                                   </SelectItem>
                                 ))}
-                              </SelectGroup>
-                            </SelectContent>
-                          </Select>
+                              </SelectContent>
+                            </Select>
 
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
-                    <FormField
-                      control={form.control}
-                      name={`entries.${activeTab}.${index}.collection_amount`}
-                      render={({ field }) => (
-                        <FormItem className="w-1/5">
-                          <FormLabel>Amount</FormLabel>
+                    <div className="space-x-4 flex justify-end">
+                      <Button type="button" onClick={() => onSubmitRow(index)}>
+                        <Check className="h-4 w-4" />
+                      </Button>
 
-                          <FormControl>
-                            <Input
-                              type="number"
-                              placeholder="Amount"
-                              // value={field.value as string}
-                              onChange={(e) => {
-                                field.onChange(e.target.value);
-                                form.trigger(field.name);
-                              }}
-                              onBlur={() => form.trigger(field.name)}
-                            />
-                            {/* <Input type="number" placeholder="Amount" value={field.value as string} onChange={field.onChange} onBlur={field.onBlur} /> */}
-                          </FormControl>
-
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name={`entries.${activeTab}.${index}.transaction_date`}
-                      render={({ field }) => (
-                        <FormItem className="w-1/5">
-                          <FormLabel>Transaction Date</FormLabel>
-
-                          <Popover open={open} onOpenChange={setOpen}>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant={"outline"}
-                                  className={cn(
-                                    "pl-3 text-left font-normal w-full",
-                                    !field.value && "text-muted-foreground"
-                                  )}
-                                  onClick={() => setOpen(true)}
-                                >
-                                  {field.value ? (
-                                    format(field.value, "PPP")
-                                  ) : (
-                                    <span>Pick a date</span>
-                                  )}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={field.value ? new Date(field.value) : undefined}
-                                onSelect={(date) => {
-                                  field.onChange(date ? format(date, "yyyy-MM-dd") : "");
-                                  form.trigger(field.name);
-                                  setOpen(false)
-                                }}
-                                disabled={(date) =>
-                                  date > new Date() || date < new Date("1900-01-01")
-                                }
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name={`entries.${activeTab}.${index}.transaction_type`}
-                      render={({ field }) => (
-                        <FormItem className="w-1/5">
-                          <FormLabel>Transaction Type</FormLabel>
-
-                          <Select
-                            onValueChange={(value) => { field.onChange(value); form.trigger(field.name) }}
-                            defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select a transaction type" />
-                              </SelectTrigger>
-                            </FormControl>
-
-                            <SelectContent>
-                              {transactionTypeOptions.map((transaction) => (
-                                <SelectItem key={transaction.value} value={transaction.value}>
-                                  {transaction.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Save Button for Each Row */}
-                    <Button type="button" onClick={() => onSubmitRow(index)}>
-                      Save
-                    </Button>
-
-                    {/* <Button
-                      type="button"
-                      onClick={() => {
-                        form.trigger(`entries.${activeTab}.${index}`).then((isValid) => {
-                          if (isValid) {
-                            onSubmitRow(index);
-                          }
-                        });
-                      }}
-                    >
-                      Save
-                    </Button> */}
-
-                    {/* Delete Button */}
-                    <Button type="button" variant="destructive" onClick={() => remove(index)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                      <Button type="button" variant="destructive" onClick={() => remove(index)}>
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
 
-                <Button type="button" onClick={() => append({ member: 0, collection_amount: 0, transaction_date: "", transaction_type: "" })}>
-                  Add Entry
-                </Button>
+                <div className="flex justify-end">
+                  <Button type="button" onClick={() => append({ member: 0, collection_amount: 0, transaction_date: "", transaction_type: "" })}>
+                    Add Entry
+                  </Button>
+                </div>
               </form>
             </Form>
 
             {/* Display Saved Entries */}
             {savedEntries[tab as CollectionType]?.length > 0 && (
-              <div className="mt-6">
-                <h2 className="text-lg font-semibold">Saved Entries</h2>
-                <ul className="space-y-2">
-                  {savedEntries[tab as CollectionType].map((entry, index) => (
-                    <li key={index} className="p-2 border rounded-md">
-                      <p><strong>Member:</strong> {entry.member}</p>
-                      <p><strong>Collection Amount:</strong> {entry.collection_amount}</p>
-                      <p><strong>Transaction Date:</strong> {entry.transaction_date}</p>
-                      <p><strong>Transaction Type:</strong> {entry.transaction_type}</p>
-                    </li>
-                  ))}
-                </ul>
+              <div className="mt-5">
+                <div className="text-lg font-semibold mb-4 text-primary">Saved Entries</div>
+
+                <div className="overflow-x-auto rounded-lg shadow-md border border-gray-200">
+                  <table className="w-full border-collapse text-left text-sm">
+                    <thead>
+                      <tr className="bg-primary/10 text-primary uppercase tracking-wide">
+                        <th className="p-3 border">#</th>
+                        <th className="p-3 border">Member</th>
+                        <th className="p-3 border">Collection Amount</th>
+                        <th className="p-3 border">Transaction Date</th>
+                        <th className="p-3 border">Transaction Type</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {savedEntries[tab as CollectionType].map((entry, index) => (
+                        <tr key={index} className="hover:bg-primary/5 transition-colors">
+                          <td className="p-3 border text-center font-semibold">{index + 1}</td>
+                          <td className="p-3 border">{entry.member}</td>
+                          <td className="p-3 border">${entry.collection_amount}</td>
+                          <td className="p-3 border">{entry.transaction_date}</td>
+                          <td className="p-3 border">{entry.transaction_type}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </TabsContent>

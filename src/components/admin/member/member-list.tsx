@@ -54,7 +54,7 @@ function MemberList({ onAddMember, onConfigureMember }: { onAddMember: (memberDa
   const [sorting, setSorting] = React.useState<SortingState>([{ id: "id", desc: false }])
 
   const [members, setMembers] = useState<Member[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  // const [loading, setLoading] = useState<boolean>(true);
 
   // Memoize the axiosInstance to prevent re-creation on every render
   const axiosInstance = useMemo(() => AxiosInstance(toast), [toast]);
@@ -65,10 +65,10 @@ function MemberList({ onAddMember, onConfigureMember }: { onAddMember: (memberDa
       .then((response) => {
         setMembers(response.data || []);
       })
-      .catch((error) => {
+      .catch(() => {
         // console.error("API Error:", error);
       })
-      .finally(() => setLoading(false));
+      // .finally(() => setLoading(false));
   }, [axiosInstance]);
 
   // useEffect(() => {

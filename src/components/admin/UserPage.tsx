@@ -165,27 +165,7 @@ const UsersPage: React.FC = () => {
   const handleAddMember = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const accessToken = localStorage.getItem("access_token");
-
-    const config = {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-    };
-
-    const formData = {
-      first_name: newMember.first_name,
-      last_name: newMember.last_name,
-      email: newMember.email,
-      date_of_birth: newMember.date_of_birth,
-      phone: newMember.phone,
-      gender: newMember.gender,
-    };
-
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/member/list/', formData, config);
-
       setFormStatus({
         success: 'Member added successfully!',
         error: null,
@@ -211,7 +191,7 @@ const UsersPage: React.FC = () => {
     }
   };
 
-  const handleConfigSubmit = async (values: z.infer<typeof formSchema>) => {
+  const handleConfigSubmit = async () => {
     const apiUrl = "http://127.0.0.1:8000/api/member/config/list/";
     const accessToken = localStorage.getItem("access_token");
 

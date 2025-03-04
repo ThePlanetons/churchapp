@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { ArrowDown, ArrowUp, MoreHorizontal, Pencil } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { ArrowDown, ArrowUp, Pencil } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -21,15 +21,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import DeleteConfirmationDialog from "../delete-confirmation";
 import ExcelExportButton from "../shared/export-to-excel";
 import PDFExportButton from "../shared/export-to-pdf";
 
@@ -79,15 +70,13 @@ const SortableHeader = ({
 
 // Component props using the names expected by your usage file
 interface CollationListProps {
-  onAddMember: (collectionData: Collection | null) => void;
-  onConfigureMember?: () => void;
+  onAddMember: (collectionData: Collection | null) => void
 }
 
-function CollationList({ onAddMember, onConfigureMember }: CollationListProps) {
+function CollationList({ onAddMember }: CollationListProps) {
   const { toast } = useToast();
   const [sorting, setSorting] = useState<SortingState>([{ id: "id", desc: false }]);
   const [collections, setCollections] = useState<Collection[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
   const [members, setMembers] = useState<Member[]>([]);
 
   // Memoize axiosInstance so that it isn't recreated on every render.
@@ -100,14 +89,14 @@ function CollationList({ onAddMember, onConfigureMember }: CollationListProps) {
       .then((response) => {
         setCollections(response.data || []);
       })
-      .catch((error) => {
+      .catch(() => {
         toast({
           variant: "destructive",
           title: "Error loading collections",
           description: "Failed to fetch collections data.",
         });
       })
-      .finally(() => setLoading(false));
+      .finally();
   }, [axiosInstance, toast]);
 
   // Fetch members data so we can show member names instead of IDs
@@ -117,7 +106,7 @@ function CollationList({ onAddMember, onConfigureMember }: CollationListProps) {
       .then((response) => {
         setMembers(response.data || []);
       })
-      .catch((error) => {
+      .catch(() => {
         toast({
           variant: "destructive",
           title: "Error loading members",
@@ -126,23 +115,23 @@ function CollationList({ onAddMember, onConfigureMember }: CollationListProps) {
       });
   }, [axiosInstance, toast]);
 
-  // For delete functionality
-  const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
+  // // For delete functionality
+  // const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  // const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
 
-  const toggleDeleteDialog = (collection: Collection | null = null) => {
-    setSelectedCollection(collection);
-    setDeleteDialogOpen((prev) => !prev);
-  };
+  // const toggleDeleteDialog = (collection: Collection | null = null) => {
+  //   setSelectedCollection(collection);
+  //   setDeleteDialogOpen((prev) => !prev);
+  // };
 
-  const handleDelete = () => {
-    if (selectedCollection) {
-      // Uncomment below to actually delete the collection
-      // axiosInstance.delete(`collections/${selectedCollection.id}`)
-      console.log("Deleting collection", selectedCollection);
-    }
-    toggleDeleteDialog();
-  };
+  // const handleDelete = () => {
+  //   if (selectedCollection) {
+  //     // Uncomment below to actually delete the collection
+  //     // axiosInstance.delete(`collections/${selectedCollection.id}`)
+  //     console.log("Deleting collection", selectedCollection);
+  //   }
+  //   toggleDeleteDialog();
+  // };
 
   // Define columns to show only the required fields.
   // For the member column, we override the cell to show the member's full name.
@@ -173,11 +162,6 @@ function CollationList({ onAddMember, onConfigureMember }: CollationListProps) {
       header: ({ column }) => <SortableHeader column={column} title="Created By" />,
     },
   ];
-
-  // When editing a collection, pass its data to the parent using onAddMember.
-  const handleEdit = (collection: Collection) => {
-    onAddMember(collection);
-  };
 
   const table = useReactTable({
     data: collections,

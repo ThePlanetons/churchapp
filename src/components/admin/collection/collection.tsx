@@ -1,8 +1,8 @@
 import { useState } from "react";
 
 import { Card } from "@/components/ui/card";
-import  { AddCollation }  from "./addcollation";
-import CollationList from "./collation-list";
+import  { AddCollation }  from "./collection-add";
+import CollationList from "./collection-list";
 
 export default function Collation() {
   const [view, setView] = useState("list");
@@ -16,7 +16,7 @@ export default function Collation() {
             setSelectedMember(memberData);
             setView("add");
           }}
-          onConfigureMember={() => setView("configure")}
+          // onConfigureMember={() => setView("configure")}
         />
       )}
       {view === "add" && (

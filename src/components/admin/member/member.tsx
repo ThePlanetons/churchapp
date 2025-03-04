@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-import { Card } from "@/components/ui/card";
 import MemberList from "./member-list";
 import AddMember from "./member-add";
 import ConfigureMember from "./member-configure";

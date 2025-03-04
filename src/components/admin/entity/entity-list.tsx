@@ -1,7 +1,6 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import { ArrowDown, ArrowUp, Pencil } from "lucide-react";
-import { ArrowUpDown } from "lucide-react";
 
 import axios from "axios";
 
@@ -87,7 +86,7 @@ function EntityList({
 }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [members, setMembers] = useState<Entity[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  // const [loading, setLoading] = useState<boolean>(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -103,7 +102,7 @@ function EntityList({
           description: error,
         });
       })
-      .finally(() => setLoading(false));
+      // .finally(() => setLoading(false));
   }, []);
 
   const handleItemClick = (member: Entity) => {

@@ -159,7 +159,7 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
 
           <div className="flex gap-3">
             <Button type="button" onClick={onClose} variant="outline">
-              <X className="mr-2 h-4 w-4" /> Close
+              <X className="h-4 w-4" /> Close
             </Button>
 
             <Button
@@ -167,7 +167,7 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
               onClick={() => form.handleSubmit(onSubmit)()}
               disabled={form.formState.isSubmitting}
             >
-              <Check className="mr-2 h-4 w-4" />
+              <Check className="h-4 w-4" />
               {memberData ? "Update" : "Save"}
             </Button>
 
@@ -177,7 +177,7 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
                 onClick={() => setShowDeleteConfirm(true)}
                 variant="destructive"
               >
-                <Trash className="mr-2 h-4 w-4" /> Delete
+                <Trash className="h-4 w-4" /> Delete
               </Button>
             )}
           </div>

@@ -11,7 +11,7 @@ import AdminLayout from './layout/AdminLayout';
 import AdminDashboard from './components/admin/dashboard/dashboard';
 import MemberManagement from './components/admin/member/member';
 import Entity from './components/admin/entity/entity';
-import Collation from './components/admin/collation/collation';
+import Collation from './components/admin/collection/collection';
 import Settings from './components/admin/settings';
 import UserManagement from './components/admin/user/user';
 import "../globals.css";
