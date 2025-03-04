@@ -85,7 +85,6 @@ function UserList({ onAddUser }: { onAddUser: (memberData: any) => void }) {
   const [sorting, setSorting] = React.useState<SortingState>([{ id: "id", desc: false }])
 
   const [members, setMembers] = useState<User[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
 
   // Memoize the axiosInstance to prevent re-creation on every render
   const axiosInstance = useMemo(() => AxiosInstance(toast), [toast]);
@@ -96,10 +95,10 @@ function UserList({ onAddUser }: { onAddUser: (memberData: any) => void }) {
       .then((response) => {
         setMembers(response.data || []);
       })
-      .catch((error) => {
+      .catch(() => {
         // console.error("API Error:", error);
       })
-      .finally(() => setLoading(false));
+      .finally();
   }, [axiosInstance]);
 
   const handleItemClick = (member: User) => {

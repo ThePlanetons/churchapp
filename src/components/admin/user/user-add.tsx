@@ -3,33 +3,21 @@ import { useForm } from "react-hook-form";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Eye, EyeOff } from "lucide-react";
 import axios from "axios";
 import { z } from "zod";
-import { format } from "date-fns"
-import { CalendarIcon, Check, Trash, X } from "lucide-react";
+import { Check, Trash, X } from "lucide-react";
 import AxiosInstance from "@/lib/axios";
 import Password from "./user-password";
 // import * as z from "zod";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
-const genderOptions = [
-  { value: "Male", label: "Male" },
-  { value: "Female", label: "Female" },
-  { value: "Other", label: "Other" },
-];
 
 function UserAdd({ onClose, userData }: { onClose: () => void; userData?: any }) {
   const { toast } = useToast();
-  const [loading, setLoading] = useState<boolean>(true);
   const [configData, setConfigData] = useState<any>(null);
-  const [formReady, setFormReady] = useState(false); // Prevents rendering before schema is ready
 
   // const [confirmPassword, setconfirmPassword] = useState("");
   const [isVisible, setIsVisible] = useState<boolean>(false);
@@ -39,16 +27,13 @@ function UserAdd({ onClose, userData }: { onClose: () => void; userData?: any })
 
   // }
 
-
   useEffect(() => {
     axios
       .get("http://127.0.0.1:8000/api/members/config/")
       .then((response) => {
         setConfigData(response.data);
-        setLoading(false);
       })
-      .catch((error) => {
-        setLoading(false);
+      .catch(() => {
         toast({
           variant: "destructive",
           title: "Error",
@@ -56,20 +41,6 @@ function UserAdd({ onClose, userData }: { onClose: () => void; userData?: any })
         });
       });
   }, []);
-
-  const dynamicSchema = configData
-    ? configData.reduce((schema: any, item: any) => {
-      if (item.dynamic_input.required) {
-        schema[item.dynamic_input.name] = z
-          .string()
-          .email("Invalid email address 2")
-          .nonempty(`${item.dynamic_input.label} is required.`).default("");
-      } else {
-        schema[item.dynamic_input.name] = z.string().optional().default("");
-      }
-      return schema;
-    }, {})
-    : {};
 
   const memberSchema = z.object({
     first_name: z.string().nonempty("First name is required.").min(1, "First name must be at least 1 characters."),
@@ -79,11 +50,6 @@ function UserAdd({ onClose, userData }: { onClose: () => void; userData?: any })
     password: z.string().nonempty("Password is required."),
     confirm_password: z.string().nonempty("Confirm Password is required."),
   });
-
-  const defaultDynamicValues = configData?.reduce((acc: any, item: any) => {
-    acc[item.dynamic_input.name] = userData?.dynamic_fields?.[item.dynamic_input.name] || "";
-    return acc;
-  }, {});
 
   const form = useForm({
     resolver: zodResolver(memberSchema),
