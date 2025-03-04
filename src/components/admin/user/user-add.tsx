@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Eye, EyeOff } from "lucide-react";
-import axios from "axios";
 import { z } from "zod";
 import { Check, Trash, X } from "lucide-react";
 import AxiosInstance from "@/lib/axios";
@@ -27,9 +26,12 @@ function UserAdd({ onClose, userData }: { onClose: () => void; userData?: any })
 
   // }
 
+  // Create the Axios instance with toast
+  const axiosInstance = useMemo(() => AxiosInstance(toast), [toast]);
+
   useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/api/members/config/")
+    axiosInstance
+      .get("members/config/")
       .then((response) => {
         setConfigData(response.data);
       })
@@ -83,17 +85,13 @@ function UserAdd({ onClose, userData }: { onClose: () => void; userData?: any })
     }
   }, [userData, configData]); // Re-run when these values change
 
-  // Create the Axios instance with toast
-  const axiosInstance = useMemo(() => AxiosInstance(toast), [toast]);
-
-
   function onSubmit(values: z.infer<typeof memberSchema>) {
     const name = localStorage.getItem("name");
     (userData ? (values as any).updated_by = name : (values as any).created_by = name);
 
     const request = userData
-      ? axiosInstance.put(`http://127.0.0.1:8000/api/auth/users/${userData.id}/`, values) // Update request for editing
-      : axiosInstance.post("http://127.0.0.1:8000/api/auth/users/", values); // Create request for adding
+      ? axiosInstance.put(`auth/users/${userData.id}/`, values) // Update request for editing
+      : axiosInstance.post("api/auth/users/", values); // Create request for adding
 
     request
       .then(() => {

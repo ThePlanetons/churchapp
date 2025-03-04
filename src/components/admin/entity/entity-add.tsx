@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import axios from "axios";
 import { z } from "zod";
 import { Check, Trash, X } from "lucide-react";
 import {
@@ -25,6 +24,7 @@ import {
 import { PhoneInput } from "@/components/ui/phone-input";
 import { CountryDropdown } from "@/components/ui/country-dropdown";
 import { Textarea } from "@/components/ui/textarea";
+import AxiosInstance from "@/lib/axios";
 
 type Entity = {
   code: string;
@@ -74,6 +74,9 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
     },
   });
 
+  // Memoize axiosInstance so that it isn't recreated on every render.
+  const axiosInstance = useMemo(() => AxiosInstance(toast), [toast]);
+
   function onSubmit(values: z.infer<typeof entitySchema>) {
     const userName = localStorage.getItem("name") || "Unknown";
     if (memberData) {
@@ -82,20 +85,12 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
       (values as any).created_by = userName;
     }
 
-    const config = {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        "Content-Type": "application/json",
-      },
-    };
-
     const request = memberData
-      ? axios.put(
-        `http://127.0.0.1:8000/api/entities/${memberData.id}/`,
-        values,
-        config
+      ? axiosInstance.put(
+        `entities/${memberData.id}/`,
+        values
       )
-      : axios.post("http://127.0.0.1:8000/api/entities/", values, config);
+      : axiosInstance.post("entities/", values);
 
     request
       .then(() => {
@@ -120,15 +115,8 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
   function handleDelete() {
     if (!memberData) return;
 
-    const config = {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        "Content-Type": "application/json",
-      },
-    };
-
-    axios
-      .delete(`http://127.0.0.1:8000/api/entities/${memberData.id}/`, config)
+    axiosInstance
+      .delete(`entities/${memberData.id}/`)
       .then(() => {
         toast({
           variant: "default",

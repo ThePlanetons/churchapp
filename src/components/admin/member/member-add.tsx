@@ -11,7 +11,6 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-import axios from "axios";
 import { z } from "zod";
 import { format } from "date-fns"
 import { CalendarIcon, Check, Trash, X } from "lucide-react";
@@ -39,8 +38,8 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
   const axiosInstance = useMemo(() => AxiosInstance(toast), [toast]);
 
   useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/api/members/config/")
+    axiosInstance
+      .get("members/config/")
       .then((response) => {
         setConfigData(response.data);
         // setLoading(false);

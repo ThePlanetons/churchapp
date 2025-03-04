@@ -1,20 +1,26 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import Button from '@mui/material/Button';
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import AxiosInstance from '@/lib/axios';
+import { useToast } from '@/hooks/use-toast';
 
 export function SignInForm() {
+  const { toast } = useToast();
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
   const navigate = useNavigate();
 
+  // Create the Axios instance with toast
+  const axiosInstance = useMemo(() => AxiosInstance(toast), [toast]);
+
   // Login function
   const login = async () => {
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/api/auth/login/", {
+      const response = await axiosInstance.post("auth/login/", {
         username: email,
         password: password,
       });

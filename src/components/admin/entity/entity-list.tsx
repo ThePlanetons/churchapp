@@ -1,8 +1,6 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useEffect, useState } from "react";
 import { ArrowDown, ArrowUp, Pencil } from "lucide-react";
-
-import axios from "axios";
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -23,6 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import AxiosInstance from "@/lib/axios";
 
 type Entity = {
   id?: number;
@@ -89,9 +88,12 @@ function EntityList({
   // const [loading, setLoading] = useState<boolean>(true);
   const { toast } = useToast();
 
+  // Memoize axiosInstance so that it isn't recreated on every render.
+  const axiosInstance = useMemo(() => AxiosInstance(toast), [toast]);
+
   useEffect(() => {
-    axios
-      .get("http://127.0.0.1:8000/api/entities/")
+    axiosInstance
+      .get("entities/")
       .then((response) => {
         setMembers(response.data);
       })
@@ -102,7 +104,7 @@ function EntityList({
           description: error,
         });
       })
-      // .finally(() => setLoading(false));
+    // .finally(() => setLoading(false));
   }, []);
 
   const handleItemClick = (member: Entity) => {
@@ -143,9 +145,9 @@ function EntityList({
                   {header.isPlaceholder
                     ? null
                     : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
                 </TableHead>
               ))}
             </TableRow>

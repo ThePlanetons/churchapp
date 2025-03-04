@@ -1,15 +1,15 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 import DynamicFormField from "./dynamic-form-field";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
-import axios from "axios";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
+import AxiosInstance from "@/lib/axios";
 
 interface FormData {
   checked: boolean;
@@ -58,22 +58,15 @@ function ConfigureMember({ onClose }: { onClose: () => void }) {
     defaultValues,
   });
 
+  // Create the Axios instance with toast
+  const axiosInstance = useMemo(() => AxiosInstance(toast), [toast]);
+
   const handleConfigSubmit = async () => {
-    const apiUrl = "http://127.0.0.1:8000/api/member/config/list/";
-    const accessToken = localStorage.getItem("access_token");
-
-    const config = {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-    };
-
     const payload = {
       data: dynamicPayload,
     };
 
-    axios.post(apiUrl, payload, config)
+    axiosInstance.post('member/config/list/', payload)
       .then(() => {
         toast({
           variant: "default",

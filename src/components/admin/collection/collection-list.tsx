@@ -85,7 +85,7 @@ function CollationList({ onAddMember }: CollationListProps) {
   // Fetch collections data from the API
   useEffect(() => {
     axiosInstance
-      .get("collections/") // Replace with "http://127.0.0.1:8000/api/collections/" if needed
+      .get("collections/")
       .then((response) => {
         setCollections(response.data || []);
       })
