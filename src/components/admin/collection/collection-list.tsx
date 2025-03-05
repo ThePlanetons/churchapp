@@ -39,14 +39,6 @@ interface Collection {
   member: number; // This is the member ID
 }
 
-// Define the Member interface used for fetching member details
-interface Member {
-  id: number;
-  first_name: string;
-  last_name: string;
-  dynamic_fields: Record<string, any>;
-}
-
 // Reusable sortable header component
 const SortableHeader = ({
   column,
