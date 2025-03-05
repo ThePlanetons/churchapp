@@ -77,7 +77,6 @@ function CollationList({ onAddMember }: CollationListProps) {
   const { toast } = useToast();
   const [sorting, setSorting] = useState<SortingState>([{ id: "id", desc: false }]);
   const [collections, setCollections] = useState<Collection[]>([]);
-  const [members, setMembers] = useState<Member[]>([]);
 
   // Memoize axiosInstance so that it isn't recreated on every render.
   const axiosInstance = useMemo(() => AxiosInstance(toast), [toast]);
@@ -97,22 +96,6 @@ function CollationList({ onAddMember }: CollationListProps) {
         });
       })
       .finally();
-  }, [axiosInstance, toast]);
-
-  // Fetch members data so we can show member names instead of IDs
-  useEffect(() => {
-    axiosInstance
-      .get("members/")
-      .then((response) => {
-        setMembers(response.data || []);
-      })
-      .catch(() => {
-        toast({
-          variant: "destructive",
-          title: "Error loading members",
-          description: "Failed to fetch members data.",
-        });
-      });
   }, [axiosInstance, toast]);
 
   // // For delete functionality
@@ -137,25 +120,20 @@ function CollationList({ onAddMember }: CollationListProps) {
   // For the member column, we override the cell to show the member's full name.
   const columns: ColumnDef<Collection>[] = [
     {
-      accessorKey: "member",
-      header: ({ column }) => <SortableHeader column={column} title="Member" />,
-      cell: ({ getValue }) => {
-        const memberId = getValue() as number;
-        const member = members.find((m) => m.id === memberId);
-        return member ? `${member.first_name} ${member.last_name}` : memberId;
-      },
+      accessorKey: "id",
+      header: ({ column }) => <SortableHeader column={column} title="Collection ID" />,
     },
     {
-      accessorKey: "collection_amount",
-      header: ({ column }) => <SortableHeader column={column} title="Amount" />,
+      accessorKey: "first_approver_name",
+      header: ({ column }) => <SortableHeader column={column} title="First Approver" />,
     },
     {
-      accessorKey: "transaction_type",
-      header: ({ column }) => <SortableHeader column={column} title="Transaction Type" />,
+      accessorKey: "second_approver_name",
+      header: ({ column }) => <SortableHeader column={column} title="Second Approver" />,
     },
     {
-      accessorKey: "collection_type",
-      header: ({ column }) => <SortableHeader column={column} title="Collection Type" />,
+      accessorKey: "date",
+      header: ({ column }) => <SortableHeader column={column} title="Date" />,
     },
     {
       accessorKey: "created_by",
@@ -217,6 +195,7 @@ function CollationList({ onAddMember }: CollationListProps) {
               created_by: "Created By",
             }}
           />
+
           <Button onClick={() => onAddMember(null)}>
             <Pencil /> Add Collection
           </Button>
@@ -231,7 +210,7 @@ function CollationList({ onAddMember }: CollationListProps) {
               {headerGroup.headers.map((header) => (
                 <TableHead
                   key={header.id}
-                  className="h-14 text-black tracking-wide"
+                  className="h-14 text-white tracking-wide"
                 >
                   {header.isPlaceholder
                     ? null

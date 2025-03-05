@@ -137,7 +137,7 @@ function UserList({ onAddUser }: { onAddUser: (memberData: any) => void }) {
               <TableRow key={headerGroup.id} className="hover:bg-transparent">
                 {headerGroup.headers.map((header) => (
                   <TableHead key={header.id}
-                    className="h-14 text-black tracking-wide"
+                    className="h-14 text-white tracking-wide"
                   >
                     {header.isPlaceholder
                       ? null

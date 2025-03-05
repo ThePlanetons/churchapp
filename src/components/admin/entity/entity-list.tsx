@@ -140,7 +140,7 @@ function EntityList({
               {headerGroup.headers.map((header) => (
                 <TableHead
                   key={header.id}
-                  className="h-14 text-black tracking-wide"
+                  className="h-14 text-white tracking-wide"
                 >
                   {header.isPlaceholder
                     ? null
