@@ -197,7 +197,6 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
           )}
         </div>
       )}
-//hello
 
       {/* Form Section */}
       <div className="p-4">
