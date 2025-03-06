@@ -99,6 +99,7 @@ export function CollectionAdd() {
       // setLoading(true);
       const { data } = await axiosInstance.get(`/collections/${id}`);
       setCollection(data);
+      console.log(collection)
     } catch (error) {
       console.log(error)
       // toast.error("Failed to fetch collection data");
