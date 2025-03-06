@@ -29,7 +29,7 @@ const items = [
   },
   {
     title: "Collection",
-    url: "/admin/collection",
+    url: "/admin/collections",
     icon: HandCoins,
   },
   {

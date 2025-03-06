@@ -35,6 +35,7 @@ import {
 import { CircleAlertIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { API_ENDPOINTS } from "@/config/api-endpoints";
+import { useNavigate, useParams } from "react-router-dom";
 
 interface Member {
   id: number;
@@ -49,10 +50,10 @@ interface Member {
 //   name: string;
 // }
 
-interface AddCollationProps {
-  onClose: () => void;
-  memberData?: Member | null;
-}
+// interface AddCollationProps {
+//   onClose: () => void;
+//   memberData?: Member | null;
+// }
 
 interface Transaction {
   member: number | null;
@@ -66,10 +67,10 @@ interface Transaction {
 
 type CollectionType = "Tithes" | "Mission" | "Partnership" | "Offering";
 
-export function AddCollation({
-  onClose,
-  memberData
-}: AddCollationProps) {
+export function CollectionAdd() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
   const { toast } = useToast();
   const [members, setMembers] = useState<Member[]>([]);
   // const [entities, setEntities] = useState<Entity[]>([]);
@@ -85,6 +86,27 @@ export function AddCollation({
   // Memoize your axios instance to include toast for error handling if needed
   const axiosInstance = useMemo(() => AxiosInstance(toast), [toast]);
 
+  const [collection, setCollection] = useState<any | null>(null);
+
+  useEffect(() => {
+    if (id) {
+      fetchCollection(id);
+    }
+  }, [id]);
+
+  const fetchCollection = async (id: string) => {
+    try {
+      // setLoading(true);
+      const { data } = await axiosInstance.get(`/collections/${id}`);
+      setCollection(data);
+    } catch (error) {
+      console.log(error)
+      // toast.error("Failed to fetch collection data");
+    } finally {
+      // setLoading(false);
+    }
+  };
+  
   const getUsername = (member: Member) => {
     const usernameKey = Object.keys(member.dynamic_fields).find((key) =>
       key.startsWith("username_")
@@ -117,15 +139,12 @@ export function AddCollation({
 
   // typeof memberSchema
   function onSubmit(values: z.infer<any>) {
-    console.log("🚀 ~ onSubmit ~ values:", values)
-    console.log(savedEntries);
-
     const combinedPayload = {
       ...values,
       ...savedEntries,
     };
 
-    const request = memberData
+    const request = id
       ? axiosInstance.put(`${API_ENDPOINTS.COLLECTIONS}save_collection/`, combinedPayload)
       : axiosInstance.post(`${API_ENDPOINTS.COLLECTIONS}save_collection/`, combinedPayload);
 
@@ -134,7 +153,7 @@ export function AddCollation({
         toast({
           variant: "default",
           title: "Success",
-          description: memberData
+          description: id
             ? "Collection updated successfully!"
             : "Collection added successfully!",
         });
@@ -161,6 +180,10 @@ export function AddCollation({
   //     return;
   //   }
   // };
+  
+  const onClose = () => {
+    navigate(`/admin/collections/`);
+  };
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -203,7 +226,7 @@ export function AddCollation({
       <div className="px-4 py-3 border-b">
         <div className="flex justify-between items-center w-full">
           <div className="text-2xl font-bold text-center">
-            {memberData ? `Edit ${activeTab}` : `Add ${activeTab}`}
+            {id ? `Edit ${activeTab}` : `Add ${activeTab}`}
           </div>
 
           <div className="flex items-center gap-3">
@@ -213,9 +236,9 @@ export function AddCollation({
 
             <Button type="button" onClick={handleClose} variant="outline"><X /> Close</Button>
 
-            <Button type="button" onClick={() => form.handleSubmit(onSubmit)()}><Check /> {memberData ? 'Update' : 'Save'}</Button>
+            <Button type="button" onClick={() => form.handleSubmit(onSubmit)()}><Check /> {id ? 'Update' : 'Save'}</Button>
 
-            {memberData && <Button type="button" variant="destructive"><Trash /> Delete</Button>}
+            {id && <Button type="button" variant="destructive"><Trash /> Delete</Button>}
           </div>
         </div>
       </div>

@@ -11,11 +11,13 @@ import AdminLayout from './layout/AdminLayout';
 import AdminDashboard from './components/admin/dashboard/dashboard';
 import MemberManagement from './components/admin/member/member';
 import Entity from './components/admin/entity/entity';
-import Collation from './components/admin/collection/collection';
+import Collection from './components/admin/collection/collection';
 import Settings from './components/admin/settings';
 import UserManagement from './components/admin/user/user';
 import "../globals.css";
 
+import  { CollectionAdd }  from "./components/admin/collection/collection-add";
+import CollectionList from "./components/admin/collection/collection-list";
 
 function App() {
   // const [count, setCount] = useState(0)
@@ -40,7 +42,12 @@ function App() {
           <Route path="/admin/members" element={<MemberManagement />} />
           <Route path="/admin/settings" element={<Settings />} />
           <Route path="/admin/entity" element={<Entity />} />
-          <Route path="/admin/collection" element={<Collation />} />
+
+          <Route path="/admin/collections" element={<Collection />}>
+            <Route index element={<CollectionList />} />
+            <Route path="add" element={<CollectionAdd />} />
+            <Route path=":id" element={<CollectionAdd />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

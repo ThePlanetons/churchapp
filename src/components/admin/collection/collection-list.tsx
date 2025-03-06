@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/table";
 import ExcelExportButton from "../shared/export-to-excel";
 import PDFExportButton from "../shared/export-to-pdf";
+import { useNavigate } from "react-router-dom";
 
 // Define the Collection interface (adjust types as needed)
 interface Collection {
@@ -60,12 +61,14 @@ const SortableHeader = ({
   );
 };
 
-// Component props using the names expected by your usage file
-interface CollationListProps {
-  onAddMember: (collectionData: Collection | null) => void
-}
+// // Component props using the names expected by your usage file
+// interface CollationListProps {
+//   onAddMember: (collectionData: Collection | null) => void
+// }
 
-function CollationList({ onAddMember }: CollationListProps) {
+function CollectionList() {
+  const navigate = useNavigate();
+
   const { toast } = useToast();
   const [sorting, setSorting] = useState<SortingState>([{ id: "id", desc: false }]);
   const [collections, setCollections] = useState<Collection[]>([]);
@@ -89,6 +92,10 @@ function CollationList({ onAddMember }: CollationListProps) {
       })
       .finally();
   }, [axiosInstance, toast]);
+
+  const handleItemClick = (id: number) => {
+    navigate(`/admin/collections/${id}`);
+  };
 
   // // For delete functionality
   // const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -188,7 +195,7 @@ function CollationList({ onAddMember }: CollationListProps) {
             }}
           />
 
-          <Button onClick={() => onAddMember(null)}>
+          <Button onClick={() => navigate("add")}>
             <Pencil /> Add Collection
           </Button>
         </div>
@@ -212,11 +219,13 @@ function CollationList({ onAddMember }: CollationListProps) {
             </TableRow>
           ))}
         </TableHeader>
+
         <TableBody>
           {table.getRowModel().rows.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
+                onClick={() => handleItemClick(row.original.id)}
                 className="cursor-pointer h-14 hover:bg-gray-200"
               >
                 {row.getVisibleCells().map((cell) => (
@@ -266,4 +275,4 @@ function CollationList({ onAddMember }: CollationListProps) {
   );
 }
 
-export default CollationList;
+export default CollectionList;
