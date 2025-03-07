@@ -33,11 +33,14 @@ interface Collection {
   transaction_id: string;
   transaction_date: string;
   transaction_type: string;
+  member: number;
+
   created_at: string;
   created_by: string;
   updated_at: string;
   updated_by: string;
-  member: number; // This is the member ID
+
+  transactions?: any | null;
 }
 
 // Reusable sortable header component
@@ -133,6 +136,22 @@ function CollectionList() {
     {
       accessorKey: "date",
       header: ({ column }) => <SortableHeader column={column} title="Date" />,
+    },
+    {
+      accessorFn: (row) => row.transactions?.grand_total,
+      id: "grand_total",
+      header: ({ column }) => <SortableHeader column={column} title="Grand Total" />,
+      cell: ({ row }) => {
+        const amount = row.getValue<number>("grand_total"); // Type casting here
+        return (
+          <div className="text-right font-bold">
+            {amount?.toLocaleString("en-SG", {
+              style: "currency",
+              currency: "SGD",
+            })}
+          </div>
+        );
+      },
     },
     {
       accessorKey: "created_by",

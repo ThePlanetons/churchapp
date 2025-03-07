@@ -29,8 +29,8 @@ import AxiosInstance from "@/lib/axios";
 type Entity = {
   code: string;
   name: string;
-  phone: string;
-  alternative_phone?: string;
+  primary_phone: string;
+  secondary_phone: string;
   address: string;
   city: string;
   state: string;
@@ -46,8 +46,8 @@ type Entity = {
 const entitySchema = z.object({
   code: z.string().nonempty("Entity Code is required."),
   name: z.string().nonempty("Entity Name is required."),
-  phone: z.string().nonempty("Phone Number is required."),
-  alternative_phone: z.string().optional(),
+  primary_phone: z.string().nonempty("Phone Number is required."),
+  secondary_phone: z.string().optional(),
   address: z.string().nonempty("Address is required."),
   city: z.string().nonempty("City is required."),
   state: z.string().nonempty("State is required."),
@@ -64,8 +64,8 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
     defaultValues: memberData || {
       code: "",
       name: "",
-      phone: "",
-      alternative_phone: "",
+      primary_phone: "",
+      secondary_phone: "",
       address: "",
       city: "",
       state: "",
@@ -255,7 +255,7 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
             <div className="col-span-4 md:col-span-2">
               <FormField
                 control={form.control}
-                name="phone"
+                name="primary_phone"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
@@ -278,7 +278,7 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
             <div className="col-span-4 md:col-span-2">
               <FormField
                 control={form.control}
-                name="alternative_phone"
+                name="secondary_phone"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Alternative Phone Number</FormLabel>
@@ -286,6 +286,7 @@ function EntityAdd({ onClose, memberData }: { onClose: () => void; memberData?: 
                       <PhoneInput
                         placeholder="Enter Alternative Phone Number"
                         {...field}
+                        value={field.value || ""}
                         defaultCountry="SG"
                       />
                     </FormControl>
