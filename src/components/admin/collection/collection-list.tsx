@@ -64,23 +64,21 @@ const SortableHeader = ({
   );
 };
 
-// // Component props using the names expected by your usage file
-// interface CollationListProps {
-//   onAddMember: (collectionData: Collection | null) => void
-// }
-
 function CollectionList() {
   const navigate = useNavigate();
 
   const { toast } = useToast();
   const [sorting, setSorting] = useState<SortingState>([{ id: "id", desc: false }]);
   const [collections, setCollections] = useState<Collection[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Memoize axiosInstance so that it isn't recreated on every render.
   const axiosInstance = useMemo(() => AxiosInstance(toast), [toast]);
 
   // Fetch collections data from the API
   useEffect(() => {
+    setLoading(true);
+
     axiosInstance
       .get("collections/")
       .then((response) => {
@@ -93,7 +91,11 @@ function CollectionList() {
           description: "Failed to fetch collections data.",
         });
       })
-      .finally();
+      .finally(
+        () => {
+          setLoading(false);
+        }
+      );
   }, [axiosInstance, toast]);
 
   const handleItemClick = (id: number) => {
@@ -171,125 +173,133 @@ function CollectionList() {
 
   return (
     <div>
-      {/* Header */}
-      <div className="flex flex-row items-center justify-between px-4 py-3 border-b">
-        <div className="text-2xl font-semibold">Collection List</div>
-        <div className="flex flex-row items-center gap-3">
-          <ExcelExportButton
-            data={table.getRowModel().rows.map((row) => row.original)}
-            fileName="Collections.xlsx"
-            excludeColumns={[
-              "actions",
-              "transaction_id",
-              "transaction_date",
-              "created_at",
-              "updated_at",
-              "updated_by",
-            ]}
-            columnMappings={{
-              member: "Member",
-              collection_amount: "Amount",
-              transaction_type: "Transaction Type",
-              collection_type: "Collection Type",
-              created_by: "Created By",
-            }}
-          />
-          <PDFExportButton
-            data={table.getRowModel().rows.map((row) => row.original)}
-            fileName="Collections.pdf"
-            excludeColumns={[
-              "actions",
-              "transaction_id",
-              "transaction_date",
-              "created_at",
-              "updated_at",
-              "updated_by",
-            ]}
-            columnMappings={{
-              member: "Member",
-              collection_amount: "Amount",
-              transaction_type: "Transaction Type",
-              collection_type: "Collection Type",
-              created_by: "Created By",
-            }}
-          />
-
-          <Button onClick={() => navigate("add")}>
-            <Pencil /> Add Collection
-          </Button>
+      {loading ? (
+        <div className="flex justify-center items-center h-40">
+          <div className="loader"></div> {/* ✅ Loader here */}
         </div>
-      </div>
+      ) : (
+        <div>
+          {/* Header */}
+          <div className="flex flex-row items-center justify-between px-4 py-3 border-b">
+            <div className="text-2xl font-semibold">Collection List</div>
+            <div className="flex flex-row items-center gap-3">
+              <ExcelExportButton
+                data={table.getRowModel().rows.map((row) => row.original)}
+                fileName="Collections.xlsx"
+                excludeColumns={[
+                  "actions",
+                  "transaction_id",
+                  "transaction_date",
+                  "created_at",
+                  "updated_at",
+                  "updated_by",
+                ]}
+                columnMappings={{
+                  member: "Member",
+                  collection_amount: "Amount",
+                  transaction_type: "Transaction Type",
+                  collection_type: "Collection Type",
+                  created_by: "Created By",
+                }}
+              />
+              <PDFExportButton
+                data={table.getRowModel().rows.map((row) => row.original)}
+                fileName="Collections.pdf"
+                excludeColumns={[
+                  "actions",
+                  "transaction_id",
+                  "transaction_date",
+                  "created_at",
+                  "updated_at",
+                  "updated_by",
+                ]}
+                columnMappings={{
+                  member: "Member",
+                  collection_amount: "Amount",
+                  transaction_type: "Transaction Type",
+                  collection_type: "Collection Type",
+                  created_by: "Created By",
+                }}
+              />
 
-      {/* Table */}
-      <Table id="table-to-pdf">
-        <TableHeader className="bg-primary">
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="hover:bg-transparent">
-              {headerGroup.headers.map((header) => (
-                <TableHead
-                  key={header.id}
-                  className="h-14 text-white tracking-wide"
-                >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
+              <Button onClick={() => navigate("add")}>
+                <Pencil /> Add Collection
+              </Button>
+            </div>
+          </div>
+
+          {/* Table */}
+          <Table id="table-to-pdf">
+            <TableHeader className="bg-primary">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id} className="hover:bg-transparent">
+                  {headerGroup.headers.map((header) => (
+                    <TableHead
+                      key={header.id}
+                      className="h-14 text-white tracking-wide"
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
+                  ))}
+                </TableRow>
               ))}
-            </TableRow>
-          ))}
-        </TableHeader>
+            </TableHeader>
 
-        <TableBody>
-          {table.getRowModel().rows.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                onClick={() => handleItemClick(row.original.id)}
-                className="cursor-pointer h-14 hover:bg-gray-200"
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="font-medium">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            <TableBody>
+              {table.getRowModel().rows.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    onClick={() => handleItemClick(row.original.id)}
+                    className="cursor-pointer h-14 hover:bg-gray-200"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id} className="font-medium">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-24 text-center">
+                    No collections found.
                   </TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No collections found.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
 
-      {/* Pagination */}
-      <div className="flex items-center justify-end space-x-2 px-2 h-14 bg-primary rounded-b-xl">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
-      </div>
+          {/* Pagination */}
+          <div className="flex items-center justify-end space-x-2 px-2 h-14 bg-primary rounded-b-xl">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              Next
+            </Button>
+          </div>
 
-      {/* Delete Confirmation Dialog (if needed) */}
-      {/* <DeleteConfirmationDialog
+          {/* Delete Confirmation Dialog (if needed) */}
+          {/* <DeleteConfirmationDialog
         isOpen={isDeleteDialogOpen}
         onClose={toggleDeleteDialog}
         onConfirm={handleDelete}
       /> */}
+        </div>
+      )}
     </div>
   );
 }

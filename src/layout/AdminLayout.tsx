@@ -6,6 +6,7 @@ import { AppSidebar } from "@/components/admin/app-sidebar";
 import { Button } from "@/components/ui/button";
 import { CircleUserRound } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuPortal, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useEffect, useState } from "react";
 
 const AdminLayout = () => {
   const navigate = useNavigate();
@@ -16,6 +17,17 @@ const AdminLayout = () => {
     navigate("/sign-in");
   };
 
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10); // Add border when scrolling
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <SidebarProvider>
       {/* Sidebar */}
@@ -23,7 +35,8 @@ const AdminLayout = () => {
 
       {/* Main Content */}
       <div className="flex flex-1 flex-col h-screen">
-        <header className="sticky top-0 z-10 p-4 bg-white shadow flex justify-between items-center">
+        <header className={`sticky top-0 z-10 px-6 py-3 flex justify-between items-center bg-white transition-all ${scrolled ? "border-b border-gray-200" : ""
+          }`}>
           <SidebarTrigger /> {/* Button to toggle the sidebar */}
 
           <DropdownMenu>
@@ -87,7 +100,7 @@ const AdminLayout = () => {
           {/* <h1 className="text-xl font-bold">Admin Panel</h1> */}
         </header>
 
-        <main className="flex-1 p-6 bg-gray-100">
+        <main className="flex-1 px-6">
           <Outlet />
         </main>
 

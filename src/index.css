@@ -98,9 +98,11 @@ button:focus-visible {
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 243 75% 59%; /* #7565E6 */
+    --primary: 243 75% 59%;
+    /* #7565E6 */
     --primary-foreground: 210 40% 98%;
-    --secondary: 226 45% 12%; /* #0F172A */
+    --secondary: 226 45% 12%;
+    /* #0F172A */
     --secondary-foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
@@ -110,7 +112,8 @@ button:focus-visible {
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 249 71% 65%; /* #7565E6 */
+    --ring: 249 71% 65%;
+    /* #7565E6 */
     --radius: 0.5rem;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
@@ -126,9 +129,11 @@ button:focus-visible {
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 249 71% 65%; /* #7565E6 */
+    --primary: 249 71% 65%;
+    /* #7565E6 */
     --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 226 45% 12%; /* #0F172A */
+    --secondary: 226 45% 12%;
+    /* #0F172A */
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
@@ -138,7 +143,8 @@ button:focus-visible {
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 249 71% 65%; /* #7565E6 */
+    --ring: 249 71% 65%;
+    /* #7565E6 */
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -146,6 +152,7 @@ button:focus-visible {
     --chart-5: 340 75% 55%;
   }
 }
+
 /* 
 @layer base {
   * {
@@ -156,3 +163,58 @@ button:focus-visible {
     @apply bg-background text-foreground;
   }
 } */
+
+/* HTML: <div class="loader"></div> */
+.loader {
+  width: 50px;
+  aspect-ratio: 1.154;
+  position: relative;
+  background: conic-gradient(from 120deg at 50% 64%, #0000, #25b09b 1deg 120deg, #0000 121deg);
+  animation: l27-0 1.5s infinite cubic-bezier(0.3, 1, 0, 1);
+}
+
+.loader:before,
+.loader:after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  transform-origin: 50% 66%;
+  animation: l27-1 1.5s infinite;
+}
+
+.loader:after {
+  --s: -1;
+}
+
+@keyframes l27-0 {
+
+  0%,
+  30% {
+    transform: rotate(0)
+  }
+
+  70% {
+    transform: rotate(120deg)
+  }
+
+  70.01%,
+  100% {
+    transform: rotate(360deg)
+  }
+}
+
+@keyframes l27-1 {
+  0% {
+    transform: rotate(calc(var(--s, 1)*120deg)) translate(0)
+  }
+
+  30%,
+  70% {
+    transform: rotate(calc(var(--s, 1)*120deg)) translate(calc(var(--s, 1)*-5px), 10px)
+  }
+
+  100% {
+    transform: rotate(calc(var(--s, 1)*120deg)) translate(0)
+  }
+}

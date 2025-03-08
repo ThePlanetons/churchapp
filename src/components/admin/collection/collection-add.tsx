@@ -4,20 +4,23 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import AxiosInstance from "@/lib/axios";
 import { API_ENDPOINTS } from "@/config/api-endpoints";
-import { CircleAlertIcon } from "lucide-react";
+import { CalendarIcon, CircleAlertIcon } from "lucide-react";
 import { X, Check, Trash } from "lucide-react";
 import { z } from "zod";
+import { format } from "date-fns"
 
 import CollectionTransactions from "./collection-transaction";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
 } from "@/components/ui/alert-dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import CalendarOriginUI from "@/components/ui/calendar-origin-ui";
 
 interface Member {
   id: number;
@@ -193,6 +196,8 @@ export function CollectionAdd() {
   // Calculate grand total
   const grandTotal = Object.values(individualTotals).reduce((sum, total) => sum + total, 0);
 
+  const [openOrigin, setOpenOrigin] = useState(false);
+
   return (
     <div>
       {/* Header */}
@@ -258,24 +263,102 @@ export function CollectionAdd() {
               <FormField
                 control={form.control}
                 name="date"
-                rules={{ required: "Date is required" }}
-                render={({ field, fieldState: { error } }) => (
+                render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Date</FormLabel>
+                    <FormLabel>Select Date</FormLabel>
+
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Popover open={openOrigin} onOpenChange={setOpenOrigin}>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "pl-3 text-left font-normal w-full",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <CalendarOriginUI
+                            value={field.value ? new Date(field.value) : undefined} // Convert string to Date
+                            onChange={(date) => {
+                              field.onChange(date ? format(date, "yyyy-MM-dd") : "");
+                              setOpenOrigin(false)
+                            }} // Convert Date back to string
+                          />
+                        </PopoverContent>
+                      </Popover>
                     </FormControl>
-                    {error && <FormMessage>{error.message}</FormMessage>}
+
+                    <FormMessage />
                   </FormItem>
                 )}
               />
+
+              {/* <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Select Date</FormLabel>
+
+                    <FormControl>
+                      <Popover open={open} onOpenChange={setOpen}>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "pl-3 text-left font-normal w-full",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value ? new Date(field.value) : undefined}
+                            onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : "")}
+                            disabled={(date) =>
+                              date > new Date() || date < new Date("1900-01-01")
+                            }
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              /> */}
 
               <FormField
                 control={form.control}
                 name="first_approver"
                 render={({ field, fieldState: { error } }) => (
-                  <FormItem>
+                  <FormItem className="col-start-1">
                     <FormLabel>First Approver</FormLabel>
+
                     <FormControl>
                       <Select
                         onValueChange={(value: string) => field.onChange(value)}
@@ -297,6 +380,7 @@ export function CollectionAdd() {
                         </SelectContent>
                       </Select>
                     </FormControl>
+
                     {error && <FormMessage>{error.message}</FormMessage>}
                   </FormItem>
                 )}
