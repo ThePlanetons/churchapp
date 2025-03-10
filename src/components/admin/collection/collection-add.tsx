@@ -36,13 +36,15 @@ interface Member {
 // }
 
 interface Transaction {
-  member: number | null;
+  member: number;
   collection_type: string;
   collection_amount: string;
   transaction_date: string;
   transaction_type: string;
 
   id?: number;
+  member_name?: string;
+  is_new?: boolean;
 }
 
 type CollectionType = "Tithes" | "Mission" | "Partnership" | "Offering";
@@ -53,6 +55,13 @@ export function CollectionAdd() {
 
   const { toast } = useToast();
   const [members, setMembers] = useState<Member[]>([]);
+
+  const [savedEntries, setSavedEntries] = useState<Record<CollectionType, Transaction[]>>({
+    Tithes: [],
+    Mission: [],
+    Partnership: [],
+    Offering: [],
+  });
 
   const form = useForm({
     defaultValues: {
@@ -65,8 +74,6 @@ export function CollectionAdd() {
   // Memoize your axios instance to include toast for error handling if needed
   const axiosInstance = useMemo(() => AxiosInstance(toast), [toast]);
 
-  const [collection, setCollection] = useState<any | null>(null);
-
   useEffect(() => {
     if (id) {
       fetchCollection(id);
@@ -77,14 +84,23 @@ export function CollectionAdd() {
     try {
       // setLoading(true);
       const { data } = await axiosInstance.get(`/collections/${id}`);
-      setCollection(data);
-      console.log(collection)
+
+      setSavedEntries((prevEntries) => ({
+        Tithes: Array.isArray(data.transactions.Tithes) ? data.transactions.Tithes : prevEntries.Tithes,
+        Mission: Array.isArray(data.transactions.Mission) ? data.transactions.Mission : prevEntries.Mission,
+        Partnership: Array.isArray(data.transactions.Partnership) ? data.transactions.Partnership : prevEntries.Partnership,
+        Offering: Array.isArray(data.transactions.Offering) ? data.transactions.Offering : prevEntries.Offering,
+      }));
     } catch (error) {
-      console.log(error)
+      console.log(error);
     } finally {
       // setLoading(false);
     }
   };
+
+  // useEffect(() => {
+  //   // console.log("savedEntries updated:", savedEntries);
+  // }, [savedEntries]);
 
   const getUsername = (member: Member) => {
     const usernameKey = Object.keys(member.dynamic_fields).find((key) =>
@@ -147,18 +163,6 @@ export function CollectionAdd() {
       });
   }
 
-  // const onSubmit: SubmitHandler<FormValues> = async (data) => {
-  //   if (!data.member || !data.date || !data.amount || !data.transaction_type) {
-  //     toast({
-  //       variant: "destructive",
-  //       title: "Missing Information",
-  //       description:
-  //         "Please select a member and enter a date, amount and transaction type",
-  //     });
-  //     return;
-  //   }
-  // };
-
   const onClose = () => {
     navigate(`/admin/collections/`);
   };
@@ -166,7 +170,11 @@ export function CollectionAdd() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   function handleClose() {
-    const hasEntries = Object.values(savedEntries).some((entries) => entries.length > 0);
+    // const hasEntries = Object.values(savedEntries).some((entries) => entries.length > 0);
+
+    const hasEntries = Object.values(savedEntries).some((transactions) =>
+      transactions.some((t) => t.is_new)
+    );
 
     if (hasEntries) {
       setIsDialogOpen(true);
@@ -177,13 +185,6 @@ export function CollectionAdd() {
 
   const collectionTypes = ["Tithes", "Mission", "Partnership", "Offering"];
   const [activeTab, setActiveTab] = useState<CollectionType>("Tithes");
-
-  const [savedEntries, setSavedEntries] = useState<Record<CollectionType, Transaction[]>>({
-    Tithes: [],
-    Mission: [],
-    Partnership: [],
-    Offering: [],
-  });
 
   // Calculate individual totals
   const individualTotals = Object.fromEntries(
@@ -304,53 +305,6 @@ export function CollectionAdd() {
                   </FormItem>
                 )}
               />
-
-              {/* <FormField
-                control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Select Date</FormLabel>
-
-                    <FormControl>
-                      <Popover open={open} onOpenChange={setOpen}>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "pl-3 text-left font-normal w-full",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value ? new Date(field.value) : undefined}
-                            onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : "")}
-                            disabled={(date) =>
-                              date > new Date() || date < new Date("1900-01-01")
-                            }
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              /> */}
 
               <FormField
                 control={form.control}

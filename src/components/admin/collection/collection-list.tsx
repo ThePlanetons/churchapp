@@ -81,8 +81,8 @@ function CollectionList() {
 
     axiosInstance
       .get("collections/")
-      .then((response) => {
-        setCollections(response.data || []);
+      .then((response: any) => {
+        setCollections(response.data.results || []);
       })
       .catch(() => {
         toast({
@@ -182,6 +182,7 @@ function CollectionList() {
           {/* Header */}
           <div className="flex flex-row items-center justify-between px-4 py-3 border-b">
             <div className="text-2xl font-semibold">Collection List</div>
+
             <div className="flex flex-row items-center gap-3">
               <ExcelExportButton
                 data={table.getRowModel().rows.map((row) => row.original)}
@@ -202,6 +203,7 @@ function CollectionList() {
                   created_by: "Created By",
                 }}
               />
+
               <PDFExportButton
                 data={table.getRowModel().rows.map((row) => row.original)}
                 fileName="Collections.pdf"

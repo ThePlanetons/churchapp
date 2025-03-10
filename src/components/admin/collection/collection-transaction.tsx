@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon, Check, Trash } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { format } from "date-fns"
 
@@ -18,13 +18,15 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 interface Transaction {
-  member: number | null;
+  member: number;
   collection_type: string;
   collection_amount: string;
   transaction_date: string;
   transaction_type: string;
 
   id?: number;
+  member_name?: string;
+  is_new?: boolean;
 }
 
 const formSchema = z.object({
@@ -36,6 +38,9 @@ const formSchema = z.object({
         collection_amount: z.coerce.number({ invalid_type_error: "Amount is required." }).min(1, "Amount must be greater than 0."),
         transaction_date: z.string().min(1, "Transaction Date is required."),
         transaction_type: z.string().min(1, "Transaction Type is required."),
+
+        member_name: z.string().optional(),
+        is_new: z.boolean().optional(),
       })
     )
   )
@@ -76,20 +81,11 @@ export default function CollectionTransactions({
       });
   }, []);
 
-  // const [savedEntries, setSavedEntries] = useState<Record<CollectionType, Transaction[]>>({
-  //   Tithes: [],
-  //   Mission: [],
-  //   Partnership: [],
-  //   Offering: []
-  // });
-
-  // const [activeTab, setActiveTab] = useState<CollectionType>("Tithes");
-
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       entries: {
-        Tithes: [{ transaction_date: "", transaction_type: "" }],
+        Tithes: [],
         Mission: [],
         Partnership: [],
         Offering: []
@@ -97,38 +93,51 @@ export default function CollectionTransactions({
     }
   });
 
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: `entries.${activeTab}`
-  });
+  // const { fields, append, remove } = useFieldArray({
+  //   control: form.control,
+  //   name: `entries.${activeTab}`
+  // });
 
-  async function onSubmitRow(index: number) {
-    const isValid = await form.trigger(`entries.${activeTab}.${index}`);
+  const fields = form.watch(`entries.${activeTab}`) || [];
 
-    if (!isValid) return;
+  const onSubmitRow = (index: number) => {
+    const currentEntries = form.getValues(`entries.${activeTab}`) || [];
 
-    const entries = form.getValues().entries[activeTab] || []; // Ensure it exists
-    const rowValues = entries[index];
+    // Get the entry being submitted
+    const entryToSubmit = currentEntries[index];
 
-    if (rowValues) {
-      setSavedEntries((prev) => ({
-        ...prev,
-        [activeTab]: [...(prev[activeTab] || []), rowValues],
-      }));
-      remove(index);
+    if (!entryToSubmit) return;
 
-      if (fields.length === 1) {
-        append(
-          {
-            member: 0,
-            collection_amount: 0,
-            transaction_date: "",
-            transaction_type: ""
-          }
-        );
-      }
+    // Ensure savedEntries exists for the active tab
+    setSavedEntries((prev) => ({
+      ...prev,
+      [activeTab]: [
+        ...(prev[activeTab] || []),
+        { ...entryToSubmit, is_new: true }, // Add is_new = true
+      ],
+    }));
+
+    // Remove the submitted row from form state
+    const updatedEntries = currentEntries.filter((_, i) => i !== index);
+
+    // If no rows remain, add a new empty row
+    if (updatedEntries.length === 0) {
+      updatedEntries.push({ member: 0, collection_amount: 0, transaction_date: "", transaction_type: "" });
     }
-  }
+
+    form.setValue(`entries.${activeTab}`, updatedEntries);
+    // form.trigger(`entries.${activeTab}`);
+    form.clearErrors(`entries.${activeTab}`); // Clear errors to prevent validation messages
+
+
+    // // Remove the submitted row from form state
+    // form.setValue(
+    //   `entries.${activeTab}`,
+    //   currentEntries.filter((_, i) => i !== index)
+    // );
+
+    // form.trigger(`entries.${activeTab}`);
+  };
 
   const transactionTypeOptions = [
     { value: "Cash", label: "Cash" },
@@ -152,7 +161,42 @@ export default function CollectionTransactions({
   // collection_amount
   // transaction_date
   // transaction_type
+
+  const onDeleteRow = (tab: CollectionType, index: number) => {
+    setSavedEntries((prev) => ({
+      ...prev,
+      [tab]: prev[tab].filter((_, i) => i !== index), // Remove the entry by index
+    }));
+  };
+
+  const onEditRow = (tab: CollectionType, index: number) => {
+    const entryToEdit = savedEntries[tab][index];
+
+    if (!entryToEdit) return;
+
+    const currentEntries = form.getValues(`entries.${tab}`) || [];
+
+    form.setValue(`entries.${tab}`, [
+      ...currentEntries,
+      {
+        ...entryToEdit,
+        collection_amount: Number(entryToEdit.collection_amount), // Ensure number type
+        is_new: true, // Mark it as a new entry
+      },
+    ]);
+
+    form.trigger(`entries.${tab}`);
+  };
+
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  // useEffect(() => {
+  //   console.log("Current Entries State:", form.getValues("entries"));
+  // }, [activeTab]);
+
+  // useEffect(() => {
+  //   console.log("Updated Entries State:", form.watch("entries"));
+  // }, [form.watch("entries")]);
 
   return (
     <div>
@@ -165,10 +209,6 @@ export default function CollectionTransactions({
               </TabsTrigger>
             ))}
           </TabsList>
-
-          {/* <div>
-            Total <span className="font-semibold">{activeTab}</span> Amount: <span className="font-bold">${savedEntries[activeTab]?.reduce((total, entry) => total + Number(entry.collection_amount || 0), 0)}</span>
-          </div> */}
         </div>
 
         {["Tithes", "Mission", "Partnership", "Offering"].map((tab) => (
@@ -176,8 +216,8 @@ export default function CollectionTransactions({
             <div className="space-y-4">
               <Form {...form}>
                 <form className="space-y-4">
-                  {fields.map((field, index) => (
-                    <div key={field.id} className="flex items-center space-x-4 border rounded-md shadow-md bg-stone-100 p-3">
+                  {fields.map((_, index) => (
+                    <div key={index} className="flex items-center space-x-4 border rounded-md shadow-md bg-stone-100 p-3">
                       <div className="w-[90%] flex space-x-4">
                         <FormField
                           control={form.control}
@@ -187,7 +227,13 @@ export default function CollectionTransactions({
                               <FormLabel>Member</FormLabel>
 
                               <Select
-                                onValueChange={(value) => { field.onChange(value); form.trigger(field.name) }}
+                                onValueChange={(value) => {
+                                  const selectedMember = membersData.find((member: any) => String(member.id) === value);
+
+                                  field.onChange(value);
+                                  form.setValue(`entries.${activeTab}.${index}.member_name`, selectedMember ? `${selectedMember.first_name} ${selectedMember.last_name}` : "");
+                                  form.trigger(field.name);
+                                }}
                                 value={field.value ? String(field.value) : ""}>
                                 <FormControl>
                                   <SelectTrigger>
@@ -222,14 +268,13 @@ export default function CollectionTransactions({
                                 <Input
                                   type="number"
                                   placeholder="Amount"
-                                  // value={field.value as string}
+                                  value={field.value !== undefined ? field.value : ""}
                                   onChange={(e) => {
                                     field.onChange(e.target.value);
                                     form.trigger(field.name);
                                   }}
                                   onBlur={() => form.trigger(field.name)}
                                 />
-                                {/* <Input type="number" placeholder="Amount" value={field.value as string} onChange={field.onChange} onBlur={field.onBlur} /> */}
                               </FormControl>
 
                               <FormMessage />
@@ -319,11 +364,26 @@ export default function CollectionTransactions({
                       </div>
 
                       <div className="space-x-4 flex justify-end">
-                        <Button type="button" onClick={() => onSubmitRow(index)}>
+                        <Button type="button"
+                          onClick={async () => {
+                            const isValid = await form.trigger(`entries.${activeTab}.${index}`);
+                            if (isValid) {
+                              onSubmitRow(index);
+                            }
+                          }}>
                           <Check className="h-4 w-4" />
                         </Button>
 
-                        <Button type="button" variant="destructive" onClick={() => remove(index)}>
+                        <Button type="button" variant="destructive"
+                          onClick={() => {
+                            const currentEntries = form.getValues(`entries.${activeTab}`) || [];
+
+                            // Remove the item at the given index
+                            const updatedEntries = currentEntries.filter((_, i) => i !== index);
+
+                            form.setValue(`entries.${activeTab}`, updatedEntries);
+                            form.trigger(`entries.${activeTab}`);
+                          }}>
                           <Trash className="h-4 w-4" />
                         </Button>
                       </div>
@@ -331,7 +391,20 @@ export default function CollectionTransactions({
                   ))}
 
                   <div className="flex justify-end">
-                    <Button type="button" onClick={() => append({ member: 0, collection_amount: 0, transaction_date: "", transaction_type: "" })}>
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        const currentEntries = form.getValues(`entries.${activeTab}`) || [];
+
+                        form.setValue(`entries.${activeTab}`, [
+                          ...currentEntries,
+                          { member: 0, collection_amount: 0, transaction_date: "", transaction_type: "" }
+                        ]);
+
+                        form.clearErrors(`entries.${activeTab}`); // Clear errors to prevent validation messages
+                        // form.trigger(`entries.${activeTab}`); // Ensure validation updates
+                      }}
+                    >
                       Add Entry
                     </Button>
                   </div>
@@ -349,6 +422,7 @@ export default function CollectionTransactions({
                         <th className="p-3 border">Collection Amount</th>
                         <th className="p-3 border">Transaction Date</th>
                         <th className="p-3 border">Transaction Type</th>
+                        <th className="p-3 border text-center">Actions</th>
                       </tr>
                     </thead>
 
@@ -356,10 +430,22 @@ export default function CollectionTransactions({
                       {savedEntries[tab as CollectionType].map((entry, index) => (
                         <tr key={index} className="hover:bg-primary/5 transition-colors">
                           <td className="p-3 border text-center font-semibold">{index + 1}</td>
-                          <td className="p-3 border">{entry.member}</td>
+                          <td className="p-3 border">{entry.member_name}</td>
                           <td className="p-3 border">${entry.collection_amount}</td>
                           <td className="p-3 border">{entry.transaction_date}</td>
                           <td className="p-3 border">{entry.transaction_type}</td>
+                          <td className="p-3 border text-center">
+                            <Button type="button"
+                              onClick={() => onEditRow(tab as CollectionType, index)}
+                            >
+                              Edit
+                            </Button>
+                            <Button type="button"
+                              onClick={() => onDeleteRow(tab as CollectionType, index)}
+                            >
+                              Delete
+                            </Button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -370,111 +456,6 @@ export default function CollectionTransactions({
           </TabsContent>
         ))}
       </Tabs>
-
-      {/* <Form {...form}>
-        <form className="space-y-4">
-          {fields.map((field, index) => (
-            <div key={field.id} className="flex items-center space-x-4">
-              <FormField
-                control={form.control}
-                name={`entries.${index}.transaction_date`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Date of Birth</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "pl-3 text-left font-normal w-full",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value ? new Date(field.value) : undefined}
-                          onSelect={(date) => field.onChange(date ? format(date, "yyyy-MM-dd") : "")}
-                          disabled={(date) =>
-                            date > new Date() || date < new Date("1900-01-01")
-                          }
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name={`entries.${index}.transaction_type`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Transaction Type</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a gender" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {transactionTypeOptions.map((transaction) => (
-                          <SelectItem key={transaction.value} value={transaction.value}>
-                            {transaction.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <Button type="button" onClick={() => onSubmitRow(index)}>
-                Save
-              </Button>
-
-              <Button type="button" variant="destructive" onClick={() => remove(index)}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          ))
-          }
-
-          <Button type="button" onClick={() => append({ transaction_date: "", transaction_type: "" })}>
-            Add Entry
-          </Button>
-        </form >
-      </Form >
-
-      {
-        savedEntries.length > 0 && (
-          <div className="mt-6">
-            <h2 className="text-lg font-semibold">Saved Entries</h2>
-            <ul className="space-y-2">
-              {savedEntries.map((entry, index) => (
-                <li key={index} className="p-2 border rounded-md">
-                  <p><strong>Category:</strong> {entry.transaction_date}</p>
-                  <p><strong>Date:</strong> {entry.transaction_type}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )
-      } */}
     </div >
   );
 }
