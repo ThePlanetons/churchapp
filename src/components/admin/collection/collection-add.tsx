@@ -85,6 +85,10 @@ export function CollectionAdd() {
       // setLoading(true);
       const { data } = await axiosInstance.get(`/collections/${id}`);
 
+      form.setValue("date", data.date);
+      form.setValue("first_approver", data.first_approver.toString()); // Ensure string type
+      form.setValue("second_approver", data.second_approver.toString()); // Ensure string type
+
       setSavedEntries((prevEntries) => ({
         Tithes: Array.isArray(data.transactions.Tithes) ? data.transactions.Tithes : prevEntries.Tithes,
         Mission: Array.isArray(data.transactions.Mission) ? data.transactions.Mission : prevEntries.Mission,
@@ -135,7 +139,7 @@ export function CollectionAdd() {
     };
 
     const request = id
-      ? axiosInstance.put(`${API_ENDPOINTS.COLLECTIONS}save_collection/`, combinedPayload)
+      ? axiosInstance.put(`${API_ENDPOINTS.COLLECTIONS}save_collection/${id}/`, combinedPayload)
       : axiosInstance.post(`${API_ENDPOINTS.COLLECTIONS}save_collection/`, combinedPayload);
 
     request
@@ -218,7 +222,7 @@ export function CollectionAdd() {
       <div className="px-4 py-3 border-b">
         <div className="flex justify-between items-center w-full">
           <div className="text-2xl font-bold text-center">
-            {id ? `Edit ${activeTab}` : `Add ${activeTab}`}
+            {id ? `Edit Collection - ${activeTab}` : `Add Collection - ${activeTab}`}
           </div>
 
           <div className="flex items-center gap-3">

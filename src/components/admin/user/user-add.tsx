@@ -48,7 +48,7 @@ function UserAdd({ onClose, userData }: { onClose: () => void; userData?: any })
     first_name: z.string().nonempty("First name is required.").min(1, "First name must be at least 1 characters."),
     last_name: z.string().nonempty("Last name is required.").min(1, "First name must be at least 1 characters."),
     username: z.string().nonempty("User name is required."),
-    email_id: z.string().nonempty("Email is required."),
+    email: z.string().nonempty("Email is required."),
     password: z.string().nonempty("Password is required."),
     confirm_password: z.string().nonempty("Confirm Password is required."),
   });
@@ -59,7 +59,7 @@ function UserAdd({ onClose, userData }: { onClose: () => void; userData?: any })
       first_name: "",
       last_name: "",
       username: "",
-      email_id: "",
+      email: "",
       password: "",
       confirm_password: "",
     },
@@ -91,7 +91,7 @@ function UserAdd({ onClose, userData }: { onClose: () => void; userData?: any })
 
     const request = userData
       ? axiosInstance.put(`auth/users/${userData.id}/`, values) // Update request for editing
-      : axiosInstance.post("api/auth/users/", values); // Create request for adding
+      : axiosInstance.post("auth/users/", values); // Create request for adding
 
     request
       .then(() => {
@@ -208,10 +208,10 @@ function UserAdd({ onClose, userData }: { onClose: () => void; userData?: any })
 
             <FormField
               control={form.control}
-              name="email_id"
+              name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email Id</FormLabel>
+                  <FormLabel>Email ID</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter Email Id" {...field} />
                   </FormControl>
