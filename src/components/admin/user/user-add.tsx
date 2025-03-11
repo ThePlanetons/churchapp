@@ -91,7 +91,7 @@ function UserAdd({ onClose, userData }: { onClose: () => void; userData?: any })
 
     const request = userData
       ? axiosInstance.put(`auth/users/${userData.id}/`, values) // Update request for editing
-      : axiosInstance.post("auth/users/", values); // Create request for adding
+      : axiosInstance.post("auth/register/", values); // Create request for adding
 
     request
       .then(() => {
