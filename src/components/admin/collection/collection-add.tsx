@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -9,7 +9,7 @@ import { X, Check, Trash } from "lucide-react";
 import { z } from "zod";
 import { format } from "date-fns"
 
-import CollectionTransactions from "./collection-transaction";
+import CollectionTransactions, { CollectionTransactionsRef } from "./collection-transaction";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -98,10 +98,6 @@ export function CollectionAdd() {
     }
   };
 
-  // useEffect(() => {
-  //   // console.log("savedEntries updated:", savedEntries);
-  // }, [savedEntries]);
-
   const getUsername = (member: Member) => {
     const usernameKey = Object.keys(member.dynamic_fields).find((key) =>
       key.startsWith("username_")
@@ -169,18 +165,35 @@ export function CollectionAdd() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  const transactionRef = useRef<CollectionTransactionsRef>(null);
+
   function handleClose() {
-    // const hasEntries = Object.values(savedEntries).some((entries) => entries.length > 0);
-
-    const hasEntries = Object.values(savedEntries).some((transactions) =>
-      transactions.some((t) => t.is_new)
-    );
-
-    if (hasEntries) {
+    if (transactionRef.current?.checkUnsavedChanges()) {
+      console.log('Gao')
+      // if (!window.confirm("You have unsaved changes. Do you really want to close?")) {
+      //   return;
+      // }
       setIsDialogOpen(true);
+
     } else {
+      transactionRef.current?.resetForm(); // Reset the form before closing
+
       onClose();
     }
+
+
+    // // const hasEntries = Object.values(savedEntries).some((entries) => entries.length > 0);
+
+    // const hasEntries = Object.values(savedEntries).some((transactions) =>
+    //   transactions.some((t) => t.is_new)
+    // );
+
+    // console.log("🚀 ~ handleClose ~ hasEntries:", hasEntries)
+    // if (hasEntries) {
+    //   setIsDialogOpen(true);
+    // } else {
+    //   onClose();
+    // }
   }
 
   const collectionTypes = ["Tithes", "Mission", "Partnership", "Offering"];
@@ -266,7 +279,7 @@ export function CollectionAdd() {
                 name="date"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Select Date</FormLabel>
+                    <FormLabel>Date</FormLabel>
 
                     <FormControl>
                       <Popover open={openOrigin} onOpenChange={setOpenOrigin}>
@@ -392,8 +405,7 @@ export function CollectionAdd() {
           </div>
         </div>
 
-        <CollectionTransactions savedEntries={savedEntries} setSavedEntries={setSavedEntries}
-          activeTab={activeTab} setActiveTab={setActiveTab}>
+        <CollectionTransactions ref={transactionRef} savedEntries={savedEntries} setSavedEntries={setSavedEntries} activeTab={activeTab} setActiveTab={setActiveTab}>
         </CollectionTransactions>
       </div>
     </div>
