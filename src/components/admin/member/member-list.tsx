@@ -155,7 +155,7 @@ function MemberList({ onAddMember, onConfigureMember }: { onAddMember: (memberDa
     },
     {
       accessorKey: "id",
-      header: ({ column }) => <SortableHeader column={column} title="ID" />,
+      header: ({ column }) => <SortableHeader column={column} title="Member ID" />,
     },
     {
       accessorKey: "first_name",

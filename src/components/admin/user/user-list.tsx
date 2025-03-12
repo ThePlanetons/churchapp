@@ -52,7 +52,7 @@ const columns: ColumnDef<User>[] = [
   },
   {
     accessorKey: "id",
-    header: ({ column }) => <SortableHeader column={column} title="ID" />,
+    header: ({ column }) => <SortableHeader column={column} title="User ID" />,
   },
   {
     accessorKey: "first_name",

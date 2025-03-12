@@ -285,38 +285,36 @@ export function CollectionAdd() {
                   <FormItem>
                     <FormLabel>Date</FormLabel>
 
-                    <FormControl>
-                      <Popover open={openOrigin} onOpenChange={setOpenOrigin}>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "pl-3 text-left font-normal w-full",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
+                    <Popover open={openOrigin} onOpenChange={setOpenOrigin}>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "pl-3 text-left font-normal w-full",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
 
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <CalendarOriginUI
-                            value={field.value ? new Date(field.value) : undefined} // Convert string to Date
-                            onChange={(date) => {
-                              field.onChange(date ? format(date, "yyyy-MM-dd") : "");
-                              setOpenOrigin(false)
-                            }} // Convert Date back to string
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </FormControl>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <CalendarOriginUI
+                          value={field.value ? new Date(field.value) : undefined} // Convert string to Date
+                          onChange={(date) => {
+                            field.onChange(date || "");
+                            setOpenOrigin(false);
+                          }}
+                        />
+                      </PopoverContent>
+                    </Popover>
 
                     <FormMessage />
                   </FormItem>

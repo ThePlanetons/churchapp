@@ -58,7 +58,7 @@ const SortableHeader = ({
 const columns: ColumnDef<Entity>[] = [
   {
     accessorKey: "id",
-    header: ({ column }) => <SortableHeader column={column} title="ID" />,
+    header: ({ column }) => <SortableHeader column={column} title="Entity ID" />,
   },
   {
     accessorKey: "code",
@@ -95,7 +95,7 @@ function EntityList({
     axiosInstance
       .get("entities/")
       .then((response) => {
-        setMembers(response.data);
+        setMembers(response.data || []);
       })
       .catch((error) => {
         toast({

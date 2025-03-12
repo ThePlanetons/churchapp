@@ -55,10 +55,10 @@ export default function CalendarOriginUI({
       <Calendar
         mode="single"
         selected={date}
-        // onSelect={setDate}
         onSelect={(selectedDate) => {
-          setDate(selectedDate);
-          onChange(selectedDate ? selectedDate.toISOString() : undefined); // Convert back to string
+          const date = selectedDate || new Date();
+          setDate(date);
+          onChange(format(date, "yyyy-MM-dd"));
         }}
         month={month}
         onMonthChange={setMonth}

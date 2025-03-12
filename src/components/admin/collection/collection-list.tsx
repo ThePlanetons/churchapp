@@ -82,7 +82,7 @@ function CollectionList() {
     axiosInstance
       .get("collections/")
       .then((response: any) => {
-        setCollections(response.data.results || []);
+        setCollections(response.data || []);
       })
       .catch(() => {
         toast({
