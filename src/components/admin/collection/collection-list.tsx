@@ -177,7 +177,7 @@ function CollectionList() {
         {/* Header */}
         <div className="flex flex-row items-center justify-between px-4 py-3 border-b">
           <div className="text-2xl font-semibold">Collection List</div>
-
+  
           <div className="flex flex-row items-center gap-3">
             <ExcelExportButton
               data={table.getRowModel().rows.map((row) => row.original)}
@@ -198,7 +198,7 @@ function CollectionList() {
                 created_by: "Created By",
               }}
             />
-
+  
             <PDFExportButton
               data={table.getRowModel().rows.map((row) => row.original)}
               fileName="Collections.pdf"
@@ -218,93 +218,86 @@ function CollectionList() {
                 created_by: "Created By",
               }}
             />
-
+  
             <Button onClick={() => navigate("add")}>
               <Pencil /> Add Collection
             </Button>
           </div>
         </div>
-
-        {loading ? (
-          <div className="flex justify-center items-center h-40">
-            <div className="loader"></div> {/* ✅ Loader here */}
-          </div>
-        ) : (
-          <div>
-            <Table id="table-to-pdf">
-              <TableHeader className="bg-primary">
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id} className="hover:bg-transparent">
-                    {headerGroup.headers.map((header) => (
-                      <TableHead
-                        key={header.id}
-                        className="h-14 text-white tracking-wide"
-                      >
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(header.column.columnDef.header, header.getContext())}
-                      </TableHead>
+  
+        <Table id="table-to-pdf">
+          <TableHeader className="bg-primary">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id} className="hover:bg-transparent">
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id} className="h-14 text-white tracking-wide">
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+  
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={columns.length}>
+                  <div className="flex justify-center items-center h-40">
+                    <div className="loader"></div>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : (
+              table.getRowModel().rows.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    onClick={() => handleItemClick(row.original.id)}
+                    className="cursor-pointer h-14 hover:bg-gray-200"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id} className="font-medium">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
                     ))}
                   </TableRow>
-                ))}
-              </TableHeader>
-
-              <TableBody>
-                {table.getRowModel().rows.length ? (
-                  table.getRowModel().rows.map((row) => (
-                    <TableRow
-                      key={row.id}
-                      onClick={() => handleItemClick(row.original.id)}
-                      className="cursor-pointer h-14 hover:bg-gray-200"
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} className="font-medium">
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={columns.length} className="h-24 text-center">
-                      No collections found.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-
-            <div className="flex items-center justify-end space-x-2 px-2 h-14 bg-primary rounded-b-xl">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
-              >
-                Previous
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Delete Confirmation Dialog (if needed) */}
-        {/* <DeleteConfirmationDialog
-        isOpen={isDeleteDialogOpen}
-        onClose={toggleDeleteDialog}
-        onConfirm={handleDelete}
-      /> */}
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-24 text-center">
+                    No collections found.
+                  </TableCell>
+                </TableRow>
+              )
+            )}
+          </TableBody>
+        </Table>
+  
+        <div className="flex items-center justify-end space-x-2 px-2 h-14 bg-primary rounded-b-xl">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Previous
+          </Button>
+  
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
+        </div>
       </div>
     </div>
   );
+  ;
 }
 
 export default CollectionList;

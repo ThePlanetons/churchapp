@@ -54,23 +54,32 @@ function MemberList({ onAddMember, onConfigureMember }: { onAddMember: (memberDa
   const [sorting, setSorting] = React.useState<SortingState>([{ id: "id", desc: false }])
 
   const [members, setMembers] = useState<Member[]>([]);
-  // const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
 
   // Memoize the axiosInstance to prevent re-creation on every render
   const axiosInstance = useMemo(() => AxiosInstance(toast), [toast]);
 
   useEffect(() => {
+    setLoading(true);
     axiosInstance
       .get("members/")
       .then((response) => {
         setMembers(response.data || []);
       })
       .catch(() => {
-        // console.error("API Error:", error);
+        toast({
+          variant: "destructive",
+          title: "Error loading collections",
+          description: "Failed to fetch collections data.",
+        });
       })
-      // .finally(() => setLoading(false));
-  }, [axiosInstance]);
-
+      .finally(
+        () => {
+          setLoading(false);
+        }
+      );
+  }, [axiosInstance, toast]);
+  
   // useEffect(() => {
   //   axios
   //     .get(`${import.meta.env.VITE_API_URL}members/`)
@@ -202,12 +211,12 @@ function MemberList({ onAddMember, onConfigureMember }: { onAddMember: (memberDa
     <div>
       <div className="flex flex-row items-center justify-between px-4 py-3 border-b">
         <div className="text-2xl font-bold">Member List</div>
-
+  
         <div className="flex flex-row items-center gap-3">
           <ExcelExportButton
             data={table.getRowModel().rows.map((row) => row.original)}
-            fileName='Members.xlsx'
-            excludeColumns={['actions', 'dynamic_fields', 'entity']}  // Columns to exclude
+            fileName="Members.xlsx"
+            excludeColumns={['actions', 'dynamic_fields', 'entity']} // Columns to exclude
             columnMappings={{
               id: 'Member ID',
               first_name: 'First Name',
@@ -218,11 +227,19 @@ function MemberList({ onAddMember, onConfigureMember }: { onAddMember: (memberDa
               gender: 'Gender',
             }}
           />
-
+  
           <PDFExportButton
             data={table.getRowModel().rows.map((row) => row.original)}
-            fileName='Members.pdf'
-            excludeColumns={['actions', 'dynamic_fields', 'entity', 'created_by', 'created_at', 'updated_by', 'updated_at']} // Columns to exclude
+            fileName="Members.pdf"
+            excludeColumns={[
+              'actions',
+              'dynamic_fields',
+              'entity',
+              'created_by',
+              'created_at',
+              'updated_by',
+              'updated_at',
+            ]} // Columns to exclude
             columnMappings={{
               id: 'Member ID',
               first_name: 'First Name',
@@ -231,53 +248,49 @@ function MemberList({ onAddMember, onConfigureMember }: { onAddMember: (memberDa
               date_of_birth: 'Date of Birth',
               phone: 'Phone Number',
               gender: 'Gender',
-            }}  // Custom column names
+            }} // Custom column names
           />
-
-          <Button onClick={onConfigureMember}><Bolt className="w-8 h-8" /> Configure</Button>
-
-          <Button onClick={() => onAddMember(null)}><Pencil /> Add Member</Button>
+  
+          <Button onClick={onConfigureMember}>
+            <Bolt className="w-8 h-8" /> Configure
+          </Button>
+  
+          <Button onClick={() => onAddMember(null)}>
+            <Pencil /> Add Member
+          </Button>
         </div>
       </div>
-
+  
       <Table id="table-to-pdf">
-        <TableHeader
-          className="bg-primary"
-        >
+        <TableHeader className="bg-primary">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="hover:bg-transparent">
               {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}
-                  className="h-14 text-white tracking-wide"
-                >
+                <TableHead key={header.id} className="h-14 text-white tracking-wide">
                   {header.isPlaceholder
                     ? null
-                    : flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
+                    : flexRender(header.column.columnDef.header, header.getContext())}
                 </TableHead>
               ))}
             </TableRow>
           ))}
         </TableHeader>
-
+  
         <TableBody>
-          {table.getRowModel().rows.length ? (
+          {loading ? (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-40 text-center">
+                <div className="flex justify-center items-center h-full">
+                  <div className="loader"></div>
+                </div>
+              </TableCell>
+            </TableRow>
+          ) : table.getRowModel().rows.length ? (
             table.getRowModel().rows.map((row) => (
-              // onClick={() => onAddMember(row.original)}
-              <TableRow
-                key={row.id}
-                className="cursor-pointer h-14 hover:bg-gray-200"
-              >
+              <TableRow key={row.id} className="cursor-pointer h-14 hover:bg-gray-200">
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}
-                    className="font-medium"
-                  >
-                    {flexRender(
-                      cell.column.columnDef.cell,
-                      cell.getContext()
-                    )}
+                  <TableCell key={cell.id} className="font-medium">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
               </TableRow>
@@ -291,7 +304,7 @@ function MemberList({ onAddMember, onConfigureMember }: { onAddMember: (memberDa
           )}
         </TableBody>
       </Table>
-
+  
       <div className="flex items-center justify-end space-x-2 px-2 h-14 bg-primary rounded-b-md">
         <Button
           variant="outline"
@@ -310,8 +323,9 @@ function MemberList({ onAddMember, onConfigureMember }: { onAddMember: (memberDa
           Next
         </Button>
       </div>
-    </div >
+    </div>
   );
+  
 }
 
 export default MemberList;
