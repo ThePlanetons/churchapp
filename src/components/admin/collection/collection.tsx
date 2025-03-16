@@ -1,4 +1,4 @@
-import { Card } from "@/components/ui/card";
+// import { Card } from "@/components/ui/card";
 import { Outlet } from "react-router-dom";
 
 export default function Collection() {
@@ -6,9 +6,9 @@ export default function Collection() {
   // const [selectedMember, setSelectedMember] = useState<any>(null);
 
   return (
-    <Card className="h-full">
+    // <Card className="h-full">
       <Outlet />
-    </Card>
+    // </Card>
 
     //   {view === "list" && (
     //     <CollectionList

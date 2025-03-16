@@ -75,7 +75,7 @@ const PDFExportButton: React.FC<PDFExportProps> = ({
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="outline" size="sm" onClick={exportToPDF}>
+          <Button variant="outline" onClick={exportToPDF}>
             <FileText /> PDF
           </Button>
         </TooltipTrigger>

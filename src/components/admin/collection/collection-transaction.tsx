@@ -7,7 +7,6 @@ import { useForm } from "react-hook-form";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { format } from "date-fns"
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem, SelectGroup } from "@/components/ui/select"; // Import ShadCN Select components
@@ -16,6 +15,12 @@ import { API_ENDPOINTS } from "@/config/api-endpoints";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+// import { TransitionPanel } from "@/components/motion-primitives/transition-panel";
+
+import { AnimatePresence, motion } from "framer-motion"
+import { GooeyFilter } from "@/components/ui/gooey-filter"
+
+import { useScreenSize } from "@/hooks/use-screen-size";
 
 interface Transaction {
   member: number;
@@ -76,7 +81,7 @@ const CollectionTransactions = forwardRef<CollectionTransactionsRef, CollectionT
 
     const { toast } = useToast();
 
-    const [membersData, setMembers] = useState<any>(null);
+    const [membersData, setMembers] = useState<any>([]);
 
     // Create the Axios instance with toast
     const axiosInstance = useMemo(() => AxiosInstance(toast), [toast]);
@@ -232,267 +237,335 @@ const CollectionTransactions = forwardRef<CollectionTransactionsRef, CollectionT
       },
     }));
 
+    const collectionTypes: CollectionType[] = ["Tithes", "Mission", "Partnership", "Offering"];
     const [openIndex, setOpenIndex] = useState<number | null>(null);
 
+    const isGooeyEnabled = true;
+    const screenSize = useScreenSize();
+
     return (
-      <div>
-        <Tabs defaultValue="Tithes" onValueChange={(value) => setActiveTab(value as CollectionType)}>
-          <div className="flex flex-row items-center justify-between">
-            <TabsList className="mb-3 h-auto -space-x-px bg-background p-0 shadow-sm shadow-black/5 rtl:space-x-reverse">
-              {["Tithes", "Mission", "Partnership", "Offering"].map((tab) => (
-                <TabsTrigger key={tab} value={tab} className="relative overflow-hidden rounded-none border border-border py-2 after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 first:rounded-s last:rounded-e data-[state=active]:bg-muted data-[state=active]:after:bg-primary">
-                  {tab}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </div>
+      <div className="min-h-screen overflow-auto">
+        <div className="w-full h-full flex justify-center font-calendas md:text-base text-xs sm:text-sm bg-white dark:bg-black">
+          <GooeyFilter
+            id="gooey-filter"
+            strength={screenSize.lessThan("md") ? 8 : 15}
+          />
 
-          {["Tithes", "Mission", "Partnership", "Offering"].map((tab) => (
-            <TabsContent key={tab} value={tab}>
-              <div className="space-y-4">
-                <Form {...form}>
-                  <form className="space-y-4">
-                    {fields.map((_, index) => (
-                      <div key={index} className="flex items-center space-x-4 border rounded-md shadow-md bg-stone-100 p-3">
-                        <div className="w-[90%] flex space-x-4">
-                          <FormField
-                            control={form.control}
-                            name={`entries.${activeTab}.${index}.member`}
-                            render={({ field }) => (
-                              <FormItem className="w-1/4">
-                                <FormLabel>Member</FormLabel>
-
-                                <Select
-                                  onValueChange={(value) => {
-                                    const selectedMember = membersData.find((member: any) => String(member.id) === value);
-
-                                    field.onChange(value);
-                                    form.setValue(`entries.${activeTab}.${index}.member_name`, selectedMember ? `${selectedMember.first_name} ${selectedMember.last_name}` : "");
-                                    form.trigger(field.name);
-                                  }}
-                                  value={field.value ? String(field.value) : ""}>
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select a member" />
-                                    </SelectTrigger>
-                                  </FormControl>
-
-                                  <SelectContent>
-                                    <SelectGroup>
-                                      {membersData && membersData.map((member: any) => (
-                                        <SelectItem key={member.id} value={String(member.id)}>
-                                          {member.id} - {member.first_name} {member.last_name}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectGroup>
-                                  </SelectContent>
-                                </Select>
-
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name={`entries.${activeTab}.${index}.collection_amount`}
-                            render={({ field }) => (
-                              <FormItem className="w-1/4">
-                                <FormLabel>Amount</FormLabel>
-
-                                <FormControl>
-                                  <Input
-                                    type="number"
-                                    placeholder="Amount"
-                                    value={field.value !== undefined ? field.value : ""}
-                                    onChange={(e) => {
-                                      field.onChange(e.target.value);
-                                      form.trigger(field.name);
-                                    }}
-                                    onBlur={() => form.trigger(field.name)}
-                                  />
-                                </FormControl>
-
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name={`entries.${activeTab}.${index}.transaction_date`}
-                            render={({ field }) => (
-                              <FormItem className="w-1/4">
-                                <FormLabel>Transaction Date</FormLabel>
-
-                                <Popover open={openIndex === index} onOpenChange={(isOpen) => setOpenIndex(isOpen ? index : null)}>
-                                  <PopoverTrigger asChild>
-                                    <FormControl>
-                                      <Button
-                                        variant={"outline"}
-                                        className={cn(
-                                          "pl-3 text-left font-normal w-full",
-                                          !field.value && "text-muted-foreground"
-                                        )}
-                                        onClick={() => setOpenIndex(index)}
-                                      >
-                                        {field.value ? (
-                                          format(field.value, "PPP")
-                                        ) : (
-                                          <span>Pick a date</span>
-                                        )}
-                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                      </Button>
-                                    </FormControl>
-                                  </PopoverTrigger>
-
-                                  <PopoverContent className="w-auto p-0" align="start">
-                                    <Calendar
-                                      mode="single"
-                                      selected={field.value ? new Date(field.value) : undefined}
-                                      onSelect={(date) => {
-                                        field.onChange(date ? format(date, "yyyy-MM-dd") : "");
-                                        form.trigger(field.name);
-                                        setOpenIndex(null)
-                                      }}
-                                      disabled={(date) =>
-                                        date > new Date() || date < new Date("1900-01-01")
-                                      }
-                                      initialFocus
-                                    />
-                                  </PopoverContent>
-                                </Popover>
-
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name={`entries.${activeTab}.${index}.transaction_type`}
-                            render={({ field }) => (
-                              <FormItem className="w-1/4">
-                                <FormLabel>Transaction Type</FormLabel>
-
-                                <Select
-                                  onValueChange={(value) => { field.onChange(value); form.trigger(field.name) }}
-                                  defaultValue={field.value}>
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select a transaction type" />
-                                    </SelectTrigger>
-                                  </FormControl>
-
-                                  <SelectContent>
-                                    {transactionTypeOptions.map((transaction) => (
-                                      <SelectItem key={transaction.value} value={transaction.value}>
-                                        {transaction.label}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-
-                        <div className="space-x-4 flex justify-end">
-                          <Button type="button"
-                            onClick={async () => {
-                              const isValid = await form.trigger(`entries.${activeTab}.${index}`);
-                              if (isValid) {
-                                onSubmitRow(index);
-                              }
-                            }}>
-                            <Check className="h-4 w-4" />
-                          </Button>
-
-                          <Button type="button" variant="destructive"
-                            onClick={() => {
-                              const currentEntries = form.getValues(`entries.${activeTab}`) || [];
-
-                              // Remove the item at the given index
-                              const updatedEntries = currentEntries.filter((_, i) => i !== index);
-
-                              form.setValue(`entries.${activeTab}`, updatedEntries);
-                              form.trigger(`entries.${activeTab}`);
-                            }}>
-                            <Trash className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-
-                    <div className="flex justify-end">
-                      <Button
-                        type="button"
-                        onClick={() => {
-                          const currentEntries = form.getValues(`entries.${activeTab}`) || [];
-
-                          form.setValue(`entries.${activeTab}`, [
-                            ...currentEntries,
-                            { member: 0, collection_amount: 0, transaction_date: "", transaction_type: "" }
-                          ]);
-
-                          form.clearErrors(`entries.${activeTab}`); // Clear errors to prevent validation messages
-                          // form.trigger(`entries.${activeTab}`); // Ensure validation updates
+          <div className="w-full relative">
+            <div
+              className="absolute inset-0"
+              style={{ filter: isGooeyEnabled ? "url(#gooey-filter)" : "none" }}
+            >
+              <div className="flex w-full">
+                {collectionTypes.map((tab) => (
+                  <div key={tab} className="relative flex-1 h-8 md:h-12">
+                    {activeTab === tab && (
+                      <motion.div
+                        layoutId="active-tab"
+                        className="absolute inset-0 bg-[#efefef]"
+                        transition={{
+                          type: "spring",
+                          bounce: 0.0,
+                          duration: 0.4,
                         }}
-                      >
-                        Add Entry
-                      </Button>
-                    </div>
-                  </form>
-                </Form>
-
-                {/* Display Saved Entries */}
-                {savedEntries[tab as CollectionType]?.length > 0 && (
-                  <div className="overflow-x-auto rounded-lg shadow-md border border-gray-200">
-                    <table className="w-full border-collapse text-left text-sm">
-                      <thead>
-                        <tr className="bg-primary/10 text-primary uppercase tracking-wide">
-                          <th className="p-3 border">#</th>
-                          <th className="p-3 border">Member</th>
-                          <th className="p-3 border">Collection Amount</th>
-                          <th className="p-3 border">Transaction Date</th>
-                          <th className="p-3 border">Transaction Type</th>
-                          <th className="p-3 border text-center">Actions</th>
-                        </tr>
-                      </thead>
-
-                      <tbody>
-                        {savedEntries[tab as CollectionType].map((entry, index) => (
-                          <tr key={index} className="hover:bg-primary/5 transition-colors">
-                            <td className="p-3 border text-center font-semibold">{index + 1}</td>
-                            <td className="p-3 border">{entry.member_name}</td>
-                            <td className="p-3 border">${entry.collection_amount}</td>
-                            <td className="p-3 border">{entry.transaction_date}</td>
-                            <td className="p-3 border">{entry.transaction_type}</td>
-                            <td className="p-3 border text-center space-x-4">
-                              <Button type="button"
-                                onClick={() => onEditRow(tab as CollectionType, index)}
-                              >
-                                Edit
-                              </Button>
-                              <Button type="button"
-                                onClick={() => onDeleteRow(tab as CollectionType, index)}
-                              >
-                                Delete
-                              </Button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                      />
+                    )}
                   </div>
-                )}
+                ))}
               </div>
-            </TabsContent>
-          ))}
-        </Tabs>
-      </div >
+              {/* Content panel */}
+              <div className="w-full bg-[#efefef] overflow-hidden text-muted-foreground">
+                <AnimatePresence mode="popLayout">
+                  <motion.div
+                    key={activeTab}
+                    initial={{
+                      opacity: 0,
+                      y: 50,
+                      filter: "blur(10px)",
+                    }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                      filter: "blur(0px)",
+                    }}
+                    exit={{
+                      opacity: 0,
+                      y: -50,
+                      filter: "blur(10px)",
+                    }}
+                    transition={{
+                      duration: 0.2,
+                      ease: "easeOut",
+                    }}
+                    className="p-8 md:p-12"
+                  >
+                    <div className="space-y-4">
+                      <Form {...form}>
+                        <form className="space-y-4">
+                          {fields.map((_, index) => (
+                            <div key={index} className="flex items-center space-x-4 border rounded-md shadow-md bg-stone-100 p-3">
+                              <div className="w-[90%] flex space-x-4">
+                                <FormField
+                                  control={form.control}
+                                  name={`entries.${activeTab}.${index}.member`}
+                                  render={({ field }) => (
+                                    <FormItem className="w-1/4">
+                                      <FormLabel>Member</FormLabel>
+
+                                      <Select
+                                        onValueChange={(value) => {
+                                          const selectedMember = membersData.find((member: any) => String(member.id) === value);
+
+                                          field.onChange(value);
+                                          form.setValue(`entries.${activeTab}.${index}.member_name`, selectedMember ? `${selectedMember.first_name} ${selectedMember.last_name}` : "");
+                                          form.trigger(field.name);
+                                        }}
+                                        value={field.value ? String(field.value) : ""}>
+                                        <FormControl>
+                                          <SelectTrigger>
+                                            <SelectValue placeholder="Select a member" />
+                                          </SelectTrigger>
+                                        </FormControl>
+
+                                        <SelectContent>
+                                          <SelectGroup>
+                                            {membersData && membersData.map((member: any) => (
+                                              <SelectItem key={member.id} value={String(member.id)}>
+                                                {member.id} - {member.first_name} {member.last_name}
+                                              </SelectItem>
+                                            ))}
+                                          </SelectGroup>
+                                        </SelectContent>
+                                      </Select>
+
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
+                                <FormField
+                                  control={form.control}
+                                  name={`entries.${activeTab}.${index}.collection_amount`}
+                                  render={({ field }) => (
+                                    <FormItem className="w-1/4">
+                                      <FormLabel>Amount</FormLabel>
+
+                                      <FormControl>
+                                        <Input
+                                          type="number"
+                                          placeholder="Amount"
+                                          value={field.value !== undefined ? field.value : ""}
+                                          onChange={(e) => {
+                                            field.onChange(e.target.value);
+                                            form.trigger(field.name);
+                                          }}
+                                          onBlur={() => form.trigger(field.name)}
+                                        />
+                                      </FormControl>
+
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
+                                <FormField
+                                  control={form.control}
+                                  name={`entries.${activeTab}.${index}.transaction_date`}
+                                  render={({ field }) => (
+                                    <FormItem className="w-1/4">
+                                      <FormLabel>Transaction Date</FormLabel>
+
+                                      <Popover open={openIndex === index} onOpenChange={(isOpen) => setOpenIndex(isOpen ? index : null)}>
+                                        <PopoverTrigger asChild>
+                                          <FormControl>
+                                            <Button
+                                              variant={"outline"}
+                                              className={cn(
+                                                "pl-3 text-left font-normal w-full",
+                                                !field.value && "text-muted-foreground"
+                                              )}
+                                              onClick={() => setOpenIndex(index)}
+                                            >
+                                              {field.value ? (
+                                                format(field.value, "PPP")
+                                              ) : (
+                                                <span>Pick a date</span>
+                                              )}
+                                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                            </Button>
+                                          </FormControl>
+                                        </PopoverTrigger>
+
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                          <Calendar
+                                            mode="single"
+                                            selected={field.value ? new Date(field.value) : undefined}
+                                            onSelect={(date) => {
+                                              field.onChange(date ? format(date, "yyyy-MM-dd") : "");
+                                              form.trigger(field.name);
+                                              setOpenIndex(null)
+                                            }}
+                                            disabled={(date) =>
+                                              date > new Date() || date < new Date("1900-01-01")
+                                            }
+                                            initialFocus
+                                          />
+                                        </PopoverContent>
+                                      </Popover>
+
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
+                                <FormField
+                                  control={form.control}
+                                  name={`entries.${activeTab}.${index}.transaction_type`}
+                                  render={({ field }) => (
+                                    <FormItem className="w-1/4">
+                                      <FormLabel>Transaction Type</FormLabel>
+
+                                      <Select
+                                        onValueChange={(value) => { field.onChange(value); form.trigger(field.name) }}
+                                        defaultValue={field.value}>
+                                        <FormControl>
+                                          <SelectTrigger>
+                                            <SelectValue placeholder="Select a transaction type" />
+                                          </SelectTrigger>
+                                        </FormControl>
+
+                                        <SelectContent>
+                                          {transactionTypeOptions.map((transaction) => (
+                                            <SelectItem key={transaction.value} value={transaction.value}>
+                                              {transaction.label}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+
+                              <div className="space-x-4 flex justify-end">
+                                <Button type="button"
+                                  onClick={async () => {
+                                    const isValid = await form.trigger(`entries.${activeTab}.${index}`);
+                                    if (isValid) {
+                                      onSubmitRow(index);
+                                    }
+                                  }}>
+                                  <Check className="h-4 w-4" />
+                                </Button>
+
+                                <Button type="button" variant="destructive"
+                                  onClick={() => {
+                                    const currentEntries = form.getValues(`entries.${activeTab}`) || [];
+
+                                    // Remove the item at the given index
+                                    const updatedEntries = currentEntries.filter((_, i) => i !== index);
+
+                                    form.setValue(`entries.${activeTab}`, updatedEntries);
+                                    form.trigger(`entries.${activeTab}`);
+                                  }}>
+                                  <Trash className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+
+                          <div className="flex justify-end">
+                            <Button
+                              type="button"
+                              onClick={() => {
+                                const currentEntries = form.getValues(`entries.${activeTab}`) || [];
+
+                                form.setValue(`entries.${activeTab}`, [
+                                  ...currentEntries,
+                                  { member: 0, collection_amount: 0, transaction_date: "", transaction_type: "" }
+                                ]);
+
+                                form.clearErrors(`entries.${activeTab}`); // Clear errors to prevent validation messages
+                                // form.trigger(`entries.${activeTab}`); // Ensure validation updates
+                              }}
+                            >
+                              Add Entry
+                            </Button>
+                          </div>
+                        </form>
+                      </Form>
+
+                      {/* Display Saved Entries */}
+                      {savedEntries[activeTab]?.length > 0 && (
+                        <div className="overflow-x-auto rounded-lg shadow-md border border-gray-200">
+                          <table className="w-full border-collapse text-left text-sm">
+                            <thead>
+                              <tr className="bg-primary/10 text-primary uppercase tracking-wide">
+                                <th className="p-3 border">#</th>
+                                <th className="p-3 border">Member</th>
+                                <th className="p-3 border">Collection Amount</th>
+                                <th className="p-3 border">Transaction Date</th>
+                                <th className="p-3 border">Transaction Type</th>
+                                <th className="p-3 border text-center">Actions</th>
+                              </tr>
+                            </thead>
+
+                            <tbody>
+                              {savedEntries[activeTab].map((entry, index) => (
+                                <tr key={index} className="hover:bg-primary/5 transition-colors">
+                                  <td className="p-3 border text-center font-semibold">{index + 1}</td>
+                                  <td className="p-3 border">{entry.member_name}</td>
+                                  <td className="p-3 border">${entry.collection_amount}</td>
+                                  <td className="p-3 border">{entry.transaction_date}</td>
+                                  <td className="p-3 border">{entry.transaction_type}</td>
+                                  <td className="p-3 border text-center space-x-4">
+                                    <Button type="button"
+                                      onClick={() => onEditRow(activeTab as CollectionType, index)}
+                                    >
+                                      Edit
+                                    </Button>
+                                    <Button type="button"
+                                      onClick={() => onDeleteRow(activeTab as CollectionType, index)}
+                                    >
+                                      Delete
+                                    </Button>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            </div>
+
+            {/* Interactive text overlay, no filter */}
+            <div className="relative flex w-full">
+              {collectionTypes.map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className="flex-1 h-8 md:h-12"
+                >
+                  <span
+                    className={`
+                        w-full h-full flex items-center justify-center
+                        ${activeTab === tab ? "text-black" : "text-muted-foreground"}
+                      `}
+                  >
+                    {tab}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 );

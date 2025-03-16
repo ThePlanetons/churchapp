@@ -53,7 +53,7 @@ const ExcelExportButton: React.FC<ExcelExportProps> = ({
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="outline" size="sm" onClick={exportToExcel}>
+          <Button variant="outline" onClick={exportToExcel}>
             <Sheet /> Excel
           </Button>
         </TooltipTrigger>

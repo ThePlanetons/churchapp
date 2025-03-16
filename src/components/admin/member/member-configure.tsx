@@ -66,7 +66,7 @@ function ConfigureMember({ onClose }: { onClose: () => void }) {
       data: dynamicPayload,
     };
 
-    axiosInstance.post('member/config/list/', payload)
+    axiosInstance.post('members/config/', payload)
       .then(() => {
         toast({
           variant: "default",

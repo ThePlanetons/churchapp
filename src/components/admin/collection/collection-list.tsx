@@ -69,11 +69,37 @@ function CollectionList() {
 
   const { toast } = useToast();
   const [sorting, setSorting] = useState<SortingState>([{ id: "id", desc: false }]);
+  const [nextLink, setNextLink] = useState<string | null>(null)
+  const [prevLink, setPrevLink] = useState<string | null>(null)
+
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Memoize axiosInstance so that it isn't recreated on every render.
   const axiosInstance = useMemo(() => AxiosInstance(toast), [toast]);
+
+  const fetchPage = (url: string | null) => {
+    if (!url) return;
+
+    setLoading(true);
+    axiosInstance
+      .get(url)
+      .then((response: any) => {
+        setCollections(response.data.results || []);
+        setNextLink(response.data.next);
+        setPrevLink(response.data.previous);
+      })
+      .catch(() => {
+        toast({
+          variant: "destructive",
+          title: "Error loading collections",
+          description: "Failed to fetch collections data.",
+        });
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
 
   // Fetch collections data from the API
   useEffect(() => {
@@ -82,7 +108,9 @@ function CollectionList() {
     axiosInstance
       .get("collections/")
       .then((response: any) => {
-        setCollections(response.data || []);
+        setCollections(response.data.results || []);
+        setNextLink(response.data.next);
+        setPrevLink(response.data.previous);
       })
       .catch(() => {
         toast({
@@ -175,9 +203,12 @@ function CollectionList() {
     <div>
       <div>
         {/* Header */}
-        <div className="flex flex-row items-center justify-between px-4 py-3 border-b">
-          <div className="text-2xl font-semibold">Collection List</div>
-  
+        <div className="flex flex-row items-center justify-between pb-3">
+          <div className="flex flex-col gap-1">
+            <div className="text-2xl font-semibold">Collections</div>
+            <div>View all of your Collection information</div>
+          </div>
+
           <div className="flex flex-row items-center gap-3">
             <ExcelExportButton
               data={table.getRowModel().rows.map((row) => row.original)}
@@ -198,7 +229,7 @@ function CollectionList() {
                 created_by: "Created By",
               }}
             />
-  
+
             <PDFExportButton
               data={table.getRowModel().rows.map((row) => row.original)}
               fileName="Collections.pdf"
@@ -218,13 +249,13 @@ function CollectionList() {
                 created_by: "Created By",
               }}
             />
-  
+
             <Button onClick={() => navigate("add")}>
               <Pencil /> Add Collection
             </Button>
           </div>
         </div>
-  
+
         <Table id="table-to-pdf">
           <TableHeader className="bg-primary">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -239,7 +270,7 @@ function CollectionList() {
               </TableRow>
             ))}
           </TableHeader>
-  
+
           <TableBody>
             {loading ? (
               <TableRow>
@@ -274,22 +305,22 @@ function CollectionList() {
             )}
           </TableBody>
         </Table>
-  
+
         <div className="flex items-center justify-end space-x-2 px-2 h-14 bg-primary rounded-b-xl">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
+            onClick={() => fetchPage(prevLink)}
+            disabled={!prevLink}
           >
             Previous
           </Button>
-  
+
           <Button
             variant="outline"
             size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
+            onClick={() => fetchPage(nextLink)}
+            disabled={!nextLink}
           >
             Next
           </Button>
