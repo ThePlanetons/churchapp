@@ -21,6 +21,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import CalendarOriginUI from "@/components/ui/calendar-origin-ui";
+import DeleteConfirmationDialog from "../delete-confirmation";
 
 interface Member {
   id: number;
@@ -173,10 +174,6 @@ export function CollectionAdd() {
 
   function handleClose() {
     if (transactionRef.current?.checkUnsavedChanges()) {
-      console.log('Gao')
-      // if (!window.confirm("You have unsaved changes. Do you really want to close?")) {
-      //   return;
-      // }
       setIsDialogOpen(true);
 
     } else {
@@ -184,20 +181,6 @@ export function CollectionAdd() {
 
       onClose();
     }
-
-
-    // // const hasEntries = Object.values(savedEntries).some((entries) => entries.length > 0);
-
-    // const hasEntries = Object.values(savedEntries).some((transactions) =>
-    //   transactions.some((t) => t.is_new)
-    // );
-
-    // console.log("🚀 ~ handleClose ~ hasEntries:", hasEntries)
-    // if (hasEntries) {
-    //   setIsDialogOpen(true);
-    // } else {
-    //   onClose();
-    // }
   }
 
   const collectionTypes = ["Tithes", "Mission", "Partnership", "Offering"];
@@ -216,8 +199,49 @@ export function CollectionAdd() {
 
   const [openOrigin, setOpenOrigin] = useState(false);
 
+  // For delete functionality
+  const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const toggleDeleteDialog = () => {
+    setDeleteDialogOpen((prev) => !prev);
+  };
+
+  const handleDelete = () => {
+    axiosInstance.delete(`collections/${id}/`)
+      .then(() => {
+        toast({
+          variant: "default",
+          title: "Success",
+          description: "Collection deleted successfully!",
+        });
+
+        onClose();
+      })
+      .catch(() => {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Error deleting collection",
+        });
+      })
+      .finally(
+        () => {
+          // setLoading(false);
+        }
+      );
+    toggleDeleteDialog();
+  };
+
   return (
     <div>
+      <DeleteConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => toggleDeleteDialog()}
+        onConfirm={handleDelete}
+        title="Are you absolutely sure?"
+        description="This action cannot be undone. Are you sure you want to permanently delete this member from our servers?"
+      />
+
       {/* Header */}
       <div className="px-4 py-3 border-b">
         <div className="flex justify-between items-center w-full">
@@ -230,7 +254,7 @@ export function CollectionAdd() {
 
             <Button type="button" onClick={() => form.handleSubmit(onSubmit)()}><Check /> {id ? 'Update' : 'Save'}</Button>
 
-            {id && <Button type="button" variant="destructive"><Trash /> Delete</Button>}
+            {id && <Button type="button" variant="destructive" onClick={() => toggleDeleteDialog()}><Trash /> Delete</Button>}
           </div>
         </div>
       </div>
