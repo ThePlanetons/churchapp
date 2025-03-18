@@ -210,7 +210,7 @@ function MemberList({ onAddMember, onConfigureMember }: { onAddMember: (memberDa
   return (
     <div>
       <div className="flex flex-row items-center justify-between px-4 py-3 border-b">
-        <div className="text-2xl font-bold">Member List</div>
+        <div className="text-2xl font-bold">Members</div>
   
         <div className="flex flex-row items-center gap-3">
           <ExcelExportButton

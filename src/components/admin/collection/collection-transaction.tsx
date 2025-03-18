@@ -273,6 +273,7 @@ const CollectionTransactions = forwardRef<CollectionTransactionsRef, CollectionT
                   </div>
                 ))}
               </div>
+
               {/* Content panel */}
               <div className="w-full bg-[#efefef] overflow-hidden text-muted-foreground">
                 <AnimatePresence mode="popLayout">
@@ -297,13 +298,13 @@ const CollectionTransactions = forwardRef<CollectionTransactionsRef, CollectionT
                       duration: 0.2,
                       ease: "easeOut",
                     }}
-                    className="p-8 md:p-12"
+                    className="p-5"
                   >
                     <div className="space-y-4">
                       <Form {...form}>
                         <form className="space-y-4">
                           {fields.map((_, index) => (
-                            <div key={index} className="flex items-center space-x-4 border rounded-md shadow-md bg-stone-100 p-3">
+                            <div key={index} className="flex items-center space-x-4 border rounded-md bg-white shadow-md p-3">
                               <div className="w-[90%] flex space-x-4">
                                 <FormField
                                   control={form.control}
@@ -498,22 +499,22 @@ const CollectionTransactions = forwardRef<CollectionTransactionsRef, CollectionT
                       </Form>
 
                       {/* Display Saved Entries */}
-                      {savedEntries[activeTab]?.length > 0 && (
-                        <div className="overflow-x-auto rounded-lg shadow-md border border-gray-200">
-                          <table className="w-full border-collapse text-left text-sm">
-                            <thead>
-                              <tr className="bg-primary/10 text-primary uppercase tracking-wide">
-                                <th className="p-3 border">#</th>
-                                <th className="p-3 border">Member</th>
-                                <th className="p-3 border">Collection Amount</th>
-                                <th className="p-3 border">Transaction Date</th>
-                                <th className="p-3 border">Transaction Type</th>
-                                <th className="p-3 border text-center">Actions</th>
-                              </tr>
-                            </thead>
+                      <div className="overflow-x-auto rounded-lg shadow-md bg-white">
+                        <table className="w-full border-collapse text-left text-sm">
+                          <thead>
+                            <tr className="bg-primary/10 text-primary uppercase tracking-wide">
+                              <th className="p-3 border">#</th>
+                              <th className="p-3 border">Member</th>
+                              <th className="p-3 border">Collection Amount</th>
+                              <th className="p-3 border">Transaction Date</th>
+                              <th className="p-3 border">Transaction Type</th>
+                              <th className="p-3 border text-center">Actions</th>
+                            </tr>
+                          </thead>
 
-                            <tbody>
-                              {savedEntries[activeTab].map((entry, index) => (
+                          <tbody>
+                            {savedEntries[activeTab]?.length > 0 ? (
+                              savedEntries[activeTab].map((entry, index) => (
                                 <tr key={index} className="hover:bg-primary/5 transition-colors">
                                   <td className="p-3 border text-center font-semibold">{index + 1}</td>
                                   <td className="p-3 border">{entry.member_name}</td>
@@ -526,18 +527,25 @@ const CollectionTransactions = forwardRef<CollectionTransactionsRef, CollectionT
                                     >
                                       Edit
                                     </Button>
-                                    <Button type="button"
+                                    <Button type="button" variant="destructive"
                                       onClick={() => onDeleteRow(activeTab as CollectionType, index)}
                                     >
                                       Delete
                                     </Button>
                                   </td>
                                 </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
+                              ))
+                            ) : (
+                              <tr>
+                                <td colSpan={6} className="p-8 text-center text-bold text-lg">
+                                  No entries found.
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+
                     </div>
                   </motion.div>
                 </AnimatePresence>

@@ -167,6 +167,11 @@ function CollectionList() {
       accessorKey: "date",
       header: ({ column }) => <SortableHeader column={column} title="Date" />,
     },
+    
+    {
+      accessorKey: "created_by",
+      header: ({ column }) => <SortableHeader column={column} title="Created By" />,
+    },
     {
       accessorFn: (row) => row.transactions?.grand_total,
       id: "grand_total",
@@ -182,11 +187,7 @@ function CollectionList() {
           </div>
         );
       },
-    },
-    {
-      accessorKey: "created_by",
-      header: ({ column }) => <SortableHeader column={column} title="Created By" />,
-    },
+    }
   ];
 
   const table = useReactTable({

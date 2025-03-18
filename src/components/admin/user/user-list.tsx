@@ -119,7 +119,7 @@ function UserList({ onAddUser }: { onAddUser: (memberData: any) => void }) {
   return (
     <div>
       <div className="flex flex-row items-center justify-between px-4 py-3 border-b">
-        <div className="text-2xl font-bold">User List</div>
+        <div className="text-2xl font-bold">Users</div>
 
         <div className="flex flex-row gap-3">
           <Button onClick={() => onAddUser(null)}>

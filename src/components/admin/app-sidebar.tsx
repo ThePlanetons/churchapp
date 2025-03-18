@@ -13,9 +13,9 @@ const items = [
     icon: Home,
   },
   {
-    title: "Users",
-    url: "/admin/users",
-    icon: User,
+    title: "Entities",
+    url: "/admin/entities",
+    icon: BookUser,
   },
   {
     title: "Members",
@@ -23,14 +23,14 @@ const items = [
     icon: Users,
   },
   {
-    title: "Entity",
-    url: "/admin/entity",
-    icon: BookUser,
-  },
-  {
-    title: "Collection",
+    title: "Collections",
     url: "/admin/collections",
     icon: HandCoins,
+  },
+  {
+    title: "Users",
+    url: "/admin/users",
+    icon: User,
   },
   {
     title: "Settings",

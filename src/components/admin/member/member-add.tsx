@@ -163,7 +163,6 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
   }, [memberData, configData]); // Re-run when these values change
 
   function onSubmit(values: z.infer<typeof memberSchema>) {
-    console.log(values)
     const name = localStorage.getItem("name");
 
     memberData ? values.updated_by = name : values.created_by = name;

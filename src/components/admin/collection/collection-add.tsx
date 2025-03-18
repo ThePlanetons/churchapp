@@ -3,11 +3,11 @@ import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import AxiosInstance from "@/lib/axios";
+import { cn } from "@/lib/utils";
 import { API_ENDPOINTS } from "@/config/api-endpoints";
-import { CalendarIcon, CircleAlertIcon } from "lucide-react";
-import { X, Check, Trash } from "lucide-react";
+import { CalendarIcon, CircleAlertIcon, X, Check, Trash } from "lucide-react";
 import { z } from "zod";
-import { format } from "date-fns"
+import { format } from "date-fns";
 
 import CollectionTransactions, { CollectionTransactionsRef } from "./collection-transaction";
 import { Button } from "@/components/ui/button";
@@ -19,9 +19,9 @@ import {
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
 } from "@/components/ui/alert-dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
 import CalendarOriginUI from "@/components/ui/calendar-origin-ui";
 import DeleteConfirmationDialog from "../delete-confirmation";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface Member {
   id: number;
@@ -30,11 +30,6 @@ interface Member {
   entity: number;
   dynamic_fields: Record<string, any>;
 }
-
-// interface Entity {
-//   id: number;
-//   name: string;
-// }
 
 interface Transaction {
   member: number;
@@ -50,11 +45,17 @@ interface Transaction {
 
 type CollectionType = "Tithes" | "Mission" | "Partnership" | "Offering";
 
-export function CollectionAdd() {
-  const { id } = useParams();
-  const navigate = useNavigate();
+const formSchema = z.object({
+  date: z.string().nonempty("Date is required."),
+  first_approver: z.coerce.number({ invalid_type_error: "First Approver is required." }).min(1, "First Approver is required."),  // Ensure value is greater than 0
+  second_approver: z.coerce.number({ invalid_type_error: "Second Approver is required." }).min(1, "Second Approver is required."),  // Ensure value is greater than 0
+});
 
+export function CollectionAdd() {
+  const navigate = useNavigate();
   const { toast } = useToast();
+  const { id } = useParams();
+
   const [members, setMembers] = useState<Member[]>([]);
 
   const [savedEntries, setSavedEntries] = useState<Record<CollectionType, Transaction[]>>({
@@ -64,11 +65,13 @@ export function CollectionAdd() {
     Offering: [],
   });
 
-  const form = useForm({
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
+      // defaultValues: memberData || {
       date: "",
-      first_approver: "",
-      second_approver: "",
+      first_approver: 0,
+      second_approver: 0,
     },
   });
 
@@ -254,7 +257,11 @@ export function CollectionAdd() {
 
             <Button type="button" onClick={() => form.handleSubmit(onSubmit)()}><Check /> {id ? 'Update' : 'Save'}</Button>
 
-            {id && <Button type="button" variant="destructive" onClick={() => toggleDeleteDialog()}><Trash /> Delete</Button>}
+            {id && <Button type="button" variant="destructive" onClick={() => toggleDeleteDialog()}>
+              <Trash size={16} strokeWidth={2} aria-hidden="true" />
+              {/* <Trash />  */}
+              Delete
+            </Button>}
           </div>
         </div>
       </div>
@@ -355,7 +362,7 @@ export function CollectionAdd() {
                     <FormControl>
                       <Select
                         onValueChange={(value: string) => field.onChange(value)}
-                        value={field.value}
+                        value={field.value ? String(field.value) : ""}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select first approver" />
@@ -388,7 +395,7 @@ export function CollectionAdd() {
                     <FormControl>
                       <Select
                         onValueChange={(value: string) => field.onChange(value)}
-                        value={field.value}
+                        value={field.value ? String(field.value) : ""}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select second approver" />

@@ -128,96 +128,96 @@ function EntityList({
     getPaginationRowModel: getPaginationRowModel(),
   });
 
- return (
-  <div>
-    <div className="flex flex-row items-center justify-between px-4 py-3 border-b">
-      <div className="text-2xl font-semibold">Entity List</div>
+  return (
+    <div>
+      <div className="flex flex-row items-center justify-between px-4 py-3 border-b">
+        <div className="text-2xl font-semibold">Entities</div>
 
-      <div className="flex flex-row gap-3">
-        <Button onClick={() => onAddMember(null)}>
-          <Pencil /> Add Entity
-        </Button>
+        <div className="flex flex-row gap-3">
+          <Button onClick={() => onAddMember(null)}>
+            <Pencil /> Add Entity
+          </Button>
+        </div>
       </div>
-    </div>
 
-    <Table>
-      <TableHeader className="bg-primary">
-        {table.getHeaderGroups().map((headerGroup) => (
-          <TableRow key={headerGroup.id} className="hover:bg-transparent">
-            {headerGroup.headers.map((header) => (
-              <TableHead
-                key={header.id}
-                className="h-14 text-white tracking-wide"
-              >
-                {header.isPlaceholder
-                  ? null
-                  : flexRender(
+      <Table>
+        <TableHeader className="bg-primary">
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id} className="hover:bg-transparent">
+              {headerGroup.headers.map((header) => (
+                <TableHead
+                  key={header.id}
+                  className="h-14 text-white tracking-wide"
+                >
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
                       header.column.columnDef.header,
                       header.getContext()
                     )}
-              </TableHead>
-            ))}
-          </TableRow>
-        ))}
-      </TableHeader>
-
-      <TableBody>
-        {loading ? (
-          <TableRow>
-            <TableCell colSpan={columns.length} className="h-40 text-center">
-              <div className="flex justify-center items-center">
-                <div className="loader"></div>
-              </div>
-            </TableCell>
-          </TableRow>
-        ) : table.getRowModel().rows.length ? (
-          table.getRowModel().rows.map((row) => (
-            <TableRow
-              key={row.id}
-              onClick={() => handleItemClick(row.original)}
-              className="cursor-pointer h-14 hover:bg-gray-100"
-            >
-              {row.getVisibleCells().map((cell) => (
-                <TableCell key={cell.id}>
-                  {flexRender(
-                    cell.column.columnDef.cell,
-                    cell.getContext()
-                  )}
-                </TableCell>
+                </TableHead>
               ))}
             </TableRow>
-          ))
-        ) : (
-          <TableRow>
-            <TableCell colSpan={columns.length} className="h-24 text-center">
-              No members found.
-            </TableCell>
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
+          ))}
+        </TableHeader>
 
-    <div className="flex items-center justify-end space-x-2 px-2 h-14 bg-primary rounded-b-xl">
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => table.previousPage()}
-        disabled={!table.getCanPreviousPage()}
-      >
-        Previous
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => table.nextPage()}
-        disabled={!table.getCanNextPage()}
-      >
-        Next
-      </Button>
+        <TableBody>
+          {loading ? (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-40 text-center">
+                <div className="flex justify-center items-center">
+                  <div className="loader"></div>
+                </div>
+              </TableCell>
+            </TableRow>
+          ) : table.getRowModel().rows.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                onClick={() => handleItemClick(row.original)}
+                className="cursor-pointer h-14 hover:bg-gray-100"
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(
+                      cell.column.columnDef.cell,
+                      cell.getContext()
+                    )}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-24 text-center">
+                No members found.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+
+      <div className="flex items-center justify-end space-x-2 px-2 h-14 bg-primary rounded-b-xl">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+        >
+          Previous
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+        >
+          Next
+        </Button>
+      </div>
     </div>
-  </div>
-);
-;
+  );
+  ;
 }
 
 export default EntityList;

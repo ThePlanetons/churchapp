@@ -16,42 +16,43 @@ import Settings from './components/admin/settings';
 import UserManagement from './components/admin/user/user';
 import "../globals.css";
 
-import  { CollectionAdd }  from "./components/admin/collection/collection-add";
+import { CollectionAdd } from "./components/admin/collection/collection-add";
 import CollectionList from "./components/admin/collection/collection-list";
 
 function App() {
-  // const [count, setCount] = useState(0)
+  // const [count, setCount] = useState(0);
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<ChurchPage />} />
+    <>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<ChurchPage />} />
 
-        <Route path="/sign-in" element={<SignIn />} />
+          <Route path="/sign-in" element={<SignIn />} />
 
-        {/* Landing routes */}
-        {/* <Route element={<LandingLayout />}>
+          {/* Landing routes */}
+          {/* <Route element={<LandingLayout />}>
           <Route path="/" element={<LandingPage />} />
           <Route path="/about" element={<AboutPage />} />
         </Route> */}
 
-        {/* Admin routes */}
-        <Route element={<AdminLayout />}>
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/users" element={<UserManagement />} />
-          <Route path="/admin/members" element={<MemberManagement />} />
-          <Route path="/admin/settings" element={<Settings />} />
-          <Route path="/admin/entity" element={<Entity />} />
-
-          <Route path="/admin/collections" element={<Collection />}>
-            <Route index element={<CollectionList />} />
-            <Route path="add" element={<CollectionAdd />} />
-            <Route path=":id" element={<CollectionAdd />} />
+          {/* Admin routes */}
+          <Route element={<AdminLayout />}>
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/entities" element={<Entity />} />
+            <Route path="/admin/members" element={<MemberManagement />} />
+            <Route path="/admin/collections" element={<Collection />}>
+              <Route index element={<CollectionList />} />
+              <Route path="add" element={<CollectionAdd />} />
+              <Route path=":id" element={<CollectionAdd />} />
+            </Route>
+            <Route path="/admin/users" element={<UserManagement />} />
+            <Route path="/admin/settings" element={<Settings />} />
           </Route>
-        </Route>
-      </Routes>
-    </BrowserRouter>
-    // <>
+        </Routes>
+      </BrowserRouter>
+    </>
+
     //   <div>
     //     <a href="https://vite.dev" target="_blank">
     //       <img src={viteLogo} className="logo" alt="Vite logo" />
@@ -72,7 +73,6 @@ function App() {
     //   <p className="read-the-docs">
     //     Click on the Vite and React logos to learn more
     //   </p>
-    // </>
   )
 }
 
