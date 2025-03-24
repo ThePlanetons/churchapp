@@ -18,6 +18,7 @@ import "../globals.css";
 
 import { CollectionAdd } from "./components/admin/collection/collection-add";
 import CollectionList from "./components/admin/collection/collection-list";
+import Account from './components/admin/account/account';
 
 function App() {
   // const [count, setCount] = useState(0);
@@ -47,6 +48,7 @@ function App() {
               <Route path=":id" element={<CollectionAdd />} />
             </Route>
             <Route path="/admin/users" element={<UserManagement />} />
+            <Route path="/admin/accounts" element={<Account />} />
             <Route path="/admin/settings" element={<Settings />} />
           </Route>
         </Routes>

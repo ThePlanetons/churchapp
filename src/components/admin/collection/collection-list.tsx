@@ -68,11 +68,11 @@ function CollectionList() {
   const navigate = useNavigate();
 
   const { toast } = useToast();
+  const [collections, setCollections] = useState<Collection[]>([]);
   const [sorting, setSorting] = useState<SortingState>([{ id: "id", desc: false }]);
   const [nextLink, setNextLink] = useState<string | null>(null)
   const [prevLink, setPrevLink] = useState<string | null>(null)
 
-  const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Memoize axiosInstance so that it isn't recreated on every render.

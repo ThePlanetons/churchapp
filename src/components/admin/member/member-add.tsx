@@ -124,10 +124,10 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
       phone: "",
       gender: "",
       address: "",
-      city: "",
-      state: "",
+      city: "Singapore",
+      state: "Singapore",
       zip_code: "",
-      country: "",
+      country: "SGP",
       tithe_pay: false,
       tithe_pay_type: "",
       ...defaultDynamicValues,
@@ -572,7 +572,7 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
                   <FormItem>
                     <FormLabel>Country</FormLabel>
                     <CountryDropdown
-                      defaultValue={field.value || "SGP"}
+                      defaultValue={field.value}
                       onChange={(country) => {
                         field.onChange(country.alpha3);
                       }}

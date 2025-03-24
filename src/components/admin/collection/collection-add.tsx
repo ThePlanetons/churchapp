@@ -137,14 +137,18 @@ export function CollectionAdd() {
   }, [axiosInstance, toast]);
 
   function onSubmit(values: z.infer<any>) {
-    const combinedPayload = {
+    const name = localStorage.getItem("name");
+
+    id ? values.updated_by = name : values.created_by = name;
+
+    const requestData = {
       ...values,
       ...savedEntries,
     };
 
     const request = id
-      ? axiosInstance.put(`${API_ENDPOINTS.COLLECTIONS}save_collection/${id}/`, combinedPayload)
-      : axiosInstance.post(`${API_ENDPOINTS.COLLECTIONS}save_collection/`, combinedPayload);
+      ? axiosInstance.put(`${API_ENDPOINTS.COLLECTIONS}save_collection/${id}/`, requestData)
+      : axiosInstance.post(`${API_ENDPOINTS.COLLECTIONS}save_collection/`, requestData);
 
     request
       .then(() => {
@@ -246,7 +250,7 @@ export function CollectionAdd() {
       />
 
       {/* Header */}
-      <div className="px-4 py-3 border-b">
+      <div className="relative px-4 py-3 border-b">
         <div className="flex justify-between items-center w-full">
           <div className="text-2xl font-bold text-center">
             {id ? `Edit Collection - ${activeTab}` : `Add Collection - ${activeTab}`}

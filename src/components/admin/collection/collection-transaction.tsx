@@ -147,6 +147,7 @@ const CollectionTransactions = forwardRef<CollectionTransactionsRef, CollectionT
         ],
       }));
 
+
       // Remove the submitted row from form state
       const updatedEntries = currentEntries.filter((_, i) => i !== index);
 
@@ -158,6 +159,7 @@ const CollectionTransactions = forwardRef<CollectionTransactionsRef, CollectionT
       form.setValue(`entries.${activeTab}`, updatedEntries);
       // form.trigger(`entries.${activeTab}`);
       form.clearErrors(`entries.${activeTab}`); // Clear errors to prevent validation messages
+      console.log(savedEntries[activeTab])
     };
 
     const transactionTypeOptions = [
@@ -251,7 +253,7 @@ const CollectionTransactions = forwardRef<CollectionTransactionsRef, CollectionT
             strength={screenSize.lessThan("md") ? 8 : 15}
           />
 
-          <div className="w-full relative">
+          <div className="w-full relative h-full">
             <div
               className="absolute inset-0"
               style={{ filter: isGooeyEnabled ? "url(#gooey-filter)" : "none" }}
@@ -275,7 +277,7 @@ const CollectionTransactions = forwardRef<CollectionTransactionsRef, CollectionT
               </div>
 
               {/* Content panel */}
-              <div className="w-full bg-[#efefef] overflow-hidden text-muted-foreground">
+              <div className="w-full bg-[#efefef] overflow-hidden">
                 <AnimatePresence mode="popLayout">
                   <motion.div
                     key={activeTab}
@@ -563,7 +565,7 @@ const CollectionTransactions = forwardRef<CollectionTransactionsRef, CollectionT
                   <span
                     className={`
                         w-full h-full flex items-center justify-center
-                        ${activeTab === tab ? "text-black" : "text-muted-foreground"}
+                        ${activeTab === tab ? "text-black" : ""}
                       `}
                   >
                     {tab}
