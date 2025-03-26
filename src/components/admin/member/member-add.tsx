@@ -627,7 +627,7 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
                         >
                           <FormItem className="flex items-center space-x-3 space-y-0">
                             <FormControl>
-                              <RadioGroupItem value="person" />
+                              <RadioGroupItem value="'Person Pay'" />
                             </FormControl>
                             <FormLabel className="font-normal">
                               Person Pay
@@ -635,10 +635,18 @@ function AddMember({ onClose, memberData }: { onClose: () => void; memberData?: 
                           </FormItem>
                           <FormItem className="flex items-center space-x-3 space-y-0">
                             <FormControl>
-                              <RadioGroupItem value="group" />
+                              <RadioGroupItem value="'Group Pay'" />
                             </FormControl>
                             <FormLabel className="font-normal">
                               Group Pay
+                            </FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center space-x-3 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="No" />
+                            </FormControl>
+                            <FormLabel className="font-normal">
+                              No
                             </FormLabel>
                           </FormItem>
                         </RadioGroup>
