@@ -30,8 +30,6 @@ export function SignInForm() {
       localStorage.setItem("access_token", response.data.token.access);
       localStorage.setItem("name", response.data.name);
 
-      console.log("Login successful!");
-
       navigate("/admin/dashboard");
     } catch (error) {
       // navigate("/admin/dashboard");

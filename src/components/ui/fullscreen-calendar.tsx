@@ -24,23 +24,16 @@ import {
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { useScreenSize } from "@/hooks/use-screen-size"
 
-interface Event {
-  id?: number
-  name?: string
-  time?: string
-  datetime?: string
-  grand_total?: number
-}
+import { useScreenSize } from "@/hooks/use-screen-size"
+import { useToast } from "@/hooks/use-toast";
+import AxiosInstance from "@/lib/axios";
+import { useEffect, useMemo } from "react";
 
 interface CalendarData {
+  id: number
   day: Date
-  events: Event[]
-}
-
-interface FullScreenCalendarProps {
-  data: CalendarData[]
+  grand_total: number
 }
 
 const colStartClasses = [
@@ -53,15 +46,22 @@ const colStartClasses = [
   "col-start-7",
 ]
 
-export function FullScreenCalendar({ data }: FullScreenCalendarProps) {
+export function FullScreenCalendar() {
+  const [calendarData, setCalendarData] = React.useState<CalendarData[]>([])
+
+  const { toast } = useToast();
+
+  // Memoize axiosInstance so that it isn't recreated on every render.
+  const axiosInstance = useMemo(() => AxiosInstance(toast), [toast]);
+
+  useEffect(() => {
+    fetchCollectionsSummary(firstDayCurrentMonth);
+  }, []);
+
   const today = startOfToday()
   const [selectedDay, setSelectedDay] = React.useState(today)
-  const [currentMonth, setCurrentMonth] = React.useState(
-    format(today, "MMM-yyyy"),
-  )
+  const [currentMonth, setCurrentMonth] = React.useState(format(today, "MMM-yyyy"))
   const firstDayCurrentMonth = parse(currentMonth, "MMM-yyyy", new Date())
-  const screenSize = useScreenSize();
-  const isDesktop = screenSize.greaterThanOrEqual("md");
 
   const days = eachDayOfInterval({
     start: startOfWeek(firstDayCurrentMonth),
@@ -71,15 +71,41 @@ export function FullScreenCalendar({ data }: FullScreenCalendarProps) {
   function previousMonth() {
     const firstDayNextMonth = add(firstDayCurrentMonth, { months: -1 })
     setCurrentMonth(format(firstDayNextMonth, "MMM-yyyy"))
+    fetchCollectionsSummary(firstDayNextMonth)
   }
 
   function nextMonth() {
     const firstDayNextMonth = add(firstDayCurrentMonth, { months: 1 })
     setCurrentMonth(format(firstDayNextMonth, "MMM-yyyy"))
+    fetchCollectionsSummary(firstDayNextMonth)
   }
 
   function goToToday() {
     setCurrentMonth(format(today, "MMM-yyyy"))
+  }
+
+  const screenSize = useScreenSize()
+  const isDesktop = screenSize.greaterThanOrEqual("md")
+
+  async function fetchCollectionsSummary(date: Date) {
+    const month = date.getMonth() + 1; // JS months are 0-based
+    const year = date.getFullYear();
+
+    try {
+      const response = await axiosInstance.get(`/collections/summary/`, {
+        params: { year, month },
+      });
+
+      setCalendarData(
+        response.data.map((entry: any, index: number) => ({
+          id: index + 1,
+          day: new Date(entry.date),
+          grand_total: entry.grand_total,
+        }))
+      );
+    } catch (error) {
+      console.error("Error fetching collections summary:", error);
+    }
   }
 
   return (
@@ -173,62 +199,7 @@ export function FullScreenCalendar({ data }: FullScreenCalendarProps) {
         <div className="flex text-xs leading-6 lg:flex-auto">
           <div className="hidden w-full border-x lg:grid lg:grid-cols-7 lg:grid-rows-5">
             {days.map((day, dayIdx) =>
-              !isDesktop ? (
-                <button
-                  onClick={() => setSelectedDay(day)}
-                  key={dayIdx}
-                  type="button"
-                  className={cn(
-                    isEqual(day, selectedDay) && "text-primary-foreground",
-                    !isEqual(day, selectedDay) &&
-                    !isToday(day) &&
-                    isSameMonth(day, firstDayCurrentMonth) &&
-                    "text-foreground",
-                    !isEqual(day, selectedDay) &&
-                    !isToday(day) &&
-                    !isSameMonth(day, firstDayCurrentMonth) &&
-                    "text-muted-foreground",
-                    (isEqual(day, selectedDay) || isToday(day)) &&
-                    "font-semibold",
-                    "flex h-14 flex-col border-b border-r px-3 py-2 hover:bg-muted focus:z-10",
-                  )}
-                >
-                  <time
-                    dateTime={format(day, "yyyy-MM-dd")}
-                    className={cn(
-                      "ml-auto flex size-6 items-center justify-center rounded-full",
-                      isEqual(day, selectedDay) &&
-                      isToday(day) &&
-                      "bg-primary text-primary-foreground",
-                      isEqual(day, selectedDay) &&
-                      !isToday(day) &&
-                      "bg-primary text-primary-foreground",
-                    )}
-                  >
-                    {format(day, "d")}
-                  </time>
-                  {data.filter((date) => isSameDay(date.day, day)).length >
-                    0 && (
-                      <div>
-                        {data
-                          .filter((date) => isSameDay(date.day, day))
-                          .map((date) => (
-                            <div
-                              key={date.day.toString()}
-                              className="-mx-0.5 mt-auto flex flex-wrap-reverse"
-                            >
-                              {date.events.map((event) => (
-                                <span
-                                  key={event.id}
-                                  className="mx-0.5 mt-1 h-1.5 w-1.5 rounded-full bg-muted-foreground"
-                                />
-                              ))}
-                            </div>
-                          ))}
-                      </div>
-                    )}
-                </button>
-              ) : (
+              isDesktop ? (
                 <div
                   key={dayIdx}
                   onClick={() => setSelectedDay(day)}
@@ -271,33 +242,71 @@ export function FullScreenCalendar({ data }: FullScreenCalendarProps) {
                       </time>
                     </button>
                   </header>
-                  <div className="flex-1 p-2.5">
-                    {data
-                      .filter((event) => isSameDay(event.day, day))
-                      .map((day) => (
-                        <div key={day.day.toString()} className="space-y-1.5">
-                          {day.events.slice(0, 1).map((event) => (
-                            <div
-                              key={event.id}
-                              className="flex flex-col items-start gap-1 rounded-lg border bg-muted/50 p-2 text-xs leading-tight"
-                            >
-                              <p className="font-medium leading-none">
-                                {event.name}
-                              </p>
-                              <p className="leading-none text-muted-foreground">
-                                {event.time}
-                              </p>
-                            </div>
-                          ))}
-                          {day.events.length > 1 && (
-                            <div className="text-xs text-muted-foreground">
-                              + {day.events.length - 1} more
-                            </div>
-                          )}
+                  <div className="flex-1 px-2.5 pb-2.5">
+                    {calendarData
+                      .filter((date) => isSameDay(date.day, day))
+                      .map((date) => (
+                        <div key={date.day.toString()} className="flex justify-center">
+                          <span className="text-[18px] font-semibold text-green-700">
+                            ${date.grand_total}
+                          </span>
                         </div>
-                      ))}
+                      ))
+                    }
                   </div>
                 </div>
+              ) : (
+                <button
+                  onClick={() => setSelectedDay(day)}
+                  key={dayIdx}
+                  type="button"
+                  className={cn(
+                    isEqual(day, selectedDay) && "text-primary-foreground",
+                    !isEqual(day, selectedDay) &&
+                    !isToday(day) &&
+                    isSameMonth(day, firstDayCurrentMonth) &&
+                    "text-foreground",
+                    !isEqual(day, selectedDay) &&
+                    !isToday(day) &&
+                    !isSameMonth(day, firstDayCurrentMonth) &&
+                    "text-muted-foreground",
+                    (isEqual(day, selectedDay) || isToday(day)) &&
+                    "font-semibold",
+                    "flex h-14 flex-col border-b border-r px-3 py-2 hover:bg-muted focus:z-10",
+                  )}
+                >
+                  <time
+                    dateTime={format(day, "yyyy-MM-dd")}
+                    className={cn(
+                      "ml-auto flex size-6 items-center justify-center rounded-full",
+                      isEqual(day, selectedDay) &&
+                      isToday(day) &&
+                      "bg-primary text-primary-foreground",
+                      isEqual(day, selectedDay) &&
+                      !isToday(day) &&
+                      "bg-primary text-primary-foreground",
+                    )}
+                  >
+                    {format(day, "d")}
+                  </time>
+                  {calendarData.filter((date) => isSameDay(date.day, day)).length >
+                    0 && (
+                      <div>
+                        {calendarData
+                          .filter((date) => isSameDay(date.day, day))
+                          .map((date) => (
+                            <div
+                              key={date.day.toString()}
+                              className="-mx-0.5 mt-auto flex flex-wrap-reverse"
+                            >
+                              <span className="text-[14px] font-semibold text-green-700">
+                                ${date.grand_total}
+                              </span>
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                </button>
               ),
             )}
           </div>
@@ -320,13 +329,13 @@ export function FullScreenCalendar({ data }: FullScreenCalendarProps) {
                   "text-muted-foreground",
                   (isEqual(day, selectedDay) || isToday(day)) &&
                   "font-semibold",
-                  "flex h-14 flex-col border-b border-r px-3 py-2 hover:bg-muted focus:z-10",
+                  "flex h-14 flex-col items-center border-b border-r py-2 hover:bg-muted focus:z-10",
                 )}
               >
                 <time
                   dateTime={format(day, "yyyy-MM-dd")}
                   className={cn(
-                    "ml-auto flex size-6 items-center justify-center rounded-full",
+                    "flex size-6 items-center justify-center rounded-full",
                     isEqual(day, selectedDay) &&
                     isToday(day) &&
                     "bg-primary text-primary-foreground",
@@ -337,21 +346,18 @@ export function FullScreenCalendar({ data }: FullScreenCalendarProps) {
                 >
                   {format(day, "d")}
                 </time>
-                {data.filter((date) => isSameDay(date.day, day)).length > 0 && (
+                {calendarData.filter((date) => isSameDay(date.day, day)).length > 0 && (
                   <div>
-                    {data
+                    {calendarData
                       .filter((date) => isSameDay(date.day, day))
                       .map((date) => (
                         <div
                           key={date.day.toString()}
-                          className="-mx-0.5 mt-auto flex flex-wrap-reverse"
+                          className="mt-auto flex flex-wrap-reverse"
                         >
-                          {date.events.map((event) => (
-                            <span
-                              key={event.id}
-                              className="mx-0.5 mt-1 h-1.5 w-1.5 rounded-full bg-muted-foreground"
-                            />
-                          ))}
+                          <span className="text-[12px] font-semibold text-green-700">
+                            ${date.grand_total}
+                          </span>
                         </div>
                       ))}
                   </div>
